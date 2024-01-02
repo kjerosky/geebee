@@ -5,7 +5,7 @@
 #define OLC_PGEX_SOUND
 #include "olcPGEX_Sound.h"
 
-#include <cstdlib>
+#include "GameBoy.h"
 
 const int WINDOW_WIDTH = 780;
 const int WINDOW_HEIGHT = 480;
@@ -14,7 +14,7 @@ class Display : public olc::PixelGameEngine {
 
 private:
 
-    //TODO
+    GameBoy* game_boy;
 
 public:
 
@@ -25,18 +25,22 @@ public:
     bool OnUserCreate() override {
         sAppName = "GeeBee";
 
-        //TODO
+        game_boy = new GameBoy();
 
         return true;
     }
 
     bool OnUserUpdate(float fElapsedTime) override {
-        //TODO
+        if (GetKey(olc::Key::ESCAPE).bPressed) {
+            return false;
+        }
+
         return true;
     }
 
     bool OnUserDestroy() override {
-        //TODO
+        delete game_boy;
+
         return true;
     }
 };
