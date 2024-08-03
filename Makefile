@@ -1,7 +1,7 @@
 EXECUTABLE = geebee
 INCLUDE_PATHS = -I/opt/homebrew/include
 LIBRARY_PATHS = -L/opt/homebrew/lib
-LIBRARIES = -lSDL2
+LIBRARIES = -lSDL2 -lSDL2_image
 SOURCES = main.cpp
 
 all: $(EXECUTABLE)
