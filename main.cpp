@@ -3,9 +3,22 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <sstream>
 
+#include "GameBoy.h"
 
-void draw_string(SDL_Renderer* renderer, SDL_Texture* font_texture, int x, int y, int scale, std::string str) {
+std::string hex(unsigned int number, int width) {
+    std::string s(width, '0');
+    for (int i = width - 1; i >= 0; i--, number >>= 4) {
+        s[i] = "0123456789ABCDEF"[number & 0xF];
+    }
+
+    return s;
+}
+
+// ----------------------------------------------------------------------------
+
+void draw_string(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, std::string str) {
     SDL_Rect font_source;
     font_source.x = 0;
     font_source.y = 0;
@@ -13,23 +26,60 @@ void draw_string(SDL_Renderer* renderer, SDL_Texture* font_texture, int x, int y
     font_source.h = 8;
 
     SDL_Rect font_destination;
-    font_destination.x = 0;
-    font_destination.y = y;
     font_destination.w = font_source.w * scale;
     font_destination.h = font_source.h * scale;
+    font_destination.x = 0;
+    font_destination.y = text_row * font_destination.h;
 
     for (int i = 0; i < str.size(); i++) {
         int char_index = (int)str[i];
 
-        font_source.x = (char_index % 16) * 8;
-        font_source.y = (char_index / 16) * 8;
+        font_source.x = (char_index % 16) * font_source.w;
+        font_source.y = (char_index / 16) * font_source.h;
 
-        font_destination.x = x + font_destination.w * i;
-
+        font_destination.x = font_destination.w * (text_column + i);
         SDL_RenderCopy(renderer, font_texture, &font_source, &font_destination);
     }
 }
 
+// ----------------------------------------------------------------------------
+
+void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Uint16 ram_page, Uint8* ram_contents) {
+    draw_string(renderer, font_texture, text_row++, text_column, 2, "      |  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+    draw_string(renderer, font_texture, text_row++, text_column, 2, "------+------------------------------------------------");
+
+    for (Uint16 row = 0x0000; row <= 0x00F0; row += 0x0010) {
+        std::string ram_row_contents = "$" + hex(ram_page + row, 4) + " |";
+
+        for (Uint16 column = 0x0000; column <= 0x000F; column++) {
+            ram_row_contents += " " + hex(ram_contents[ram_page + row + column], 2);
+        }
+
+        draw_string(renderer, font_texture, text_row++, text_column, 2, ram_row_contents);
+    }
+}
+
+void draw_cpu_info(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Cpu_Info cpu_info) {
+    draw_string(renderer, font_texture, text_row, text_column, 2, "STATUS: ");
+    SDL_SetTextureColorMod(font_texture, cpu_info.z_flag ? 0x00 : 0xFF, cpu_info.z_flag ? 0xFF : 0x00, 0x00);
+    draw_string(renderer, font_texture, text_row, text_column + 8, 2, "Z");
+    SDL_SetTextureColorMod(font_texture, cpu_info.n_flag ? 0x00 : 0xFF, cpu_info.n_flag ? 0xFF : 0x00, 0x00);
+    draw_string(renderer, font_texture, text_row, text_column + 10, 2, "N");
+    SDL_SetTextureColorMod(font_texture, cpu_info.h_flag ? 0x00 : 0xFF, cpu_info.h_flag ? 0xFF : 0x00, 0x00);
+    draw_string(renderer, font_texture, text_row, text_column + 12, 2, "H");
+    SDL_SetTextureColorMod(font_texture, cpu_info.c_flag ? 0x00 : 0xFF, cpu_info.c_flag ? 0xFF : 0x00, 0x00);
+    draw_string(renderer, font_texture, text_row, text_column + 14, 2, "C");
+    SDL_SetTextureColorMod(font_texture, 0xFF, 0xFF, 0xFF);
+
+    draw_string(renderer, font_texture, text_row + 2, text_column, 2, "A: $" + hex(cpu_info.a, 2));
+    draw_string(renderer, font_texture, text_row + 3, text_column, 2, "B: $" + hex(cpu_info.b, 2) + "    C: $" + hex(cpu_info.c, 2));
+    draw_string(renderer, font_texture, text_row + 4, text_column, 2, "D: $" + hex(cpu_info.d, 2) + "    E: $" + hex(cpu_info.e, 2));
+    draw_string(renderer, font_texture, text_row + 5, text_column, 2, "H: $" + hex(cpu_info.h, 2) + "    L: $" + hex(cpu_info.l, 2));
+    draw_string(renderer, font_texture, text_row + 7, text_column, 2, "PC: $" + hex(cpu_info.pc, 4));
+    draw_string(renderer, font_texture, text_row + 8, text_column, 2, "SP: $" + hex(cpu_info.sp, 4));
+}
+
+// ----------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
     const int GAMEBOY_SCREEN_WIDTH = 160;
@@ -61,56 +111,46 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    GameBoy game_boy;
+    Uint8* ram_contents = game_boy.get_ram_contents();
+    Uint16 initial_pc = game_boy.get_cpu_info().pc;
+    Uint16 ram_page = initial_pc & 0xFF00;
+
+    // setup ram contents for testing
+    std::stringstream ss;
+    ss << "0E 3B 41";
+    uint16_t nOffset = initial_pc;
+    while (!ss.eof())
+    {
+        std::string b;
+        ss >> b;
+        ram_contents[nOffset++] = (Uint8)std::stoul(b, nullptr, 16);
+    }
+
     bool is_running = true;
     while (is_running) {
         SDL_Event event;
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
                 is_running = false;
+            } else if (event.type == SDL_KEYDOWN) {
+                if (event.key.keysym.sym == SDLK_ESCAPE) {
+                    is_running = false;
+                } else if (event.key.keysym.sym == SDLK_SPACE) {
+                    game_boy.execute_next_instruction();
+                } else if (event.key.keysym.sym == SDLK_EQUALS) {
+                    ram_page = ram_page + 0x0100;
+                } else if (event.key.keysym.sym == SDLK_MINUS) {
+                    ram_page = ram_page - 0x0100;
+                }
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+        SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
         SDL_RenderClear(renderer);
 
-        draw_string(renderer, font_texture, 0,  0 * 16, 2, "      |  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
-        draw_string(renderer, font_texture, 0,  1 * 16, 2, "------+------------------------------------------------");
-        draw_string(renderer, font_texture, 0,  2 * 16, 2, "$0000 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  3 * 16, 2, "$0010 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  4 * 16, 2, "$0020 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  5 * 16, 2, "$0030 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  6 * 16, 2, "$0040 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  7 * 16, 2, "$0050 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  8 * 16, 2, "$0060 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0,  9 * 16, 2, "$0070 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 10 * 16, 2, "$0080 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 11 * 16, 2, "$0090 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 12 * 16, 2, "$00A0 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 13 * 16, 2, "$00B0 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 14 * 16, 2, "$00C0 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 15 * 16, 2, "$00D0 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 16 * 16, 2, "$00E0 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-        draw_string(renderer, font_texture, 0, 17 * 16, 2, "$00F0 | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-
-        draw_string(renderer, font_texture, 0, 19 * 16, 2, "STATUS: N V - B D I Z C");
-        draw_string(renderer, font_texture, 0, 20 * 16, 2, "PC: $0000");
-        draw_string(renderer, font_texture, 0, 21 * 16, 2, "SP: $00");
-        draw_string(renderer, font_texture, 0, 22 * 16, 2, "A: $00 [0]");
-        draw_string(renderer, font_texture, 0, 23 * 16, 2, "X: $00 [0]");
-        draw_string(renderer, font_texture, 0, 24 * 16, 2, "Y: $00 [0]");
-
-        SDL_SetTextureColorMod(font_texture, 0xFF, 0x00, 0x00);
-        draw_string(renderer, font_texture,  8 * 16, 19 * 16, 2, "N");
-        draw_string(renderer, font_texture, 10 * 16, 19 * 16, 2, "V");
-        draw_string(renderer, font_texture, 14 * 16, 19 * 16, 2, "B");
-        draw_string(renderer, font_texture, 16 * 16, 19 * 16, 2, "D");
-        draw_string(renderer, font_texture, 18 * 16, 19 * 16, 2, "I");
-        draw_string(renderer, font_texture, 22 * 16, 19 * 16, 2, "C");
-        SDL_SetTextureColorMod(font_texture, 0x80, 0x80, 0x80);
-        draw_string(renderer, font_texture, 12 * 16, 19 * 16, 2, "-");
-        SDL_SetTextureColorMod(font_texture, 0x00, 0xFF, 0x00);
-        draw_string(renderer, font_texture, 20 * 16, 19 * 16, 2, "Z");
-        SDL_SetTextureColorMod(font_texture, 0xFF, 0xFF, 0xFF);
+        draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_contents);
+        draw_cpu_info(renderer, font_texture, 22, 1, 2, game_boy.get_cpu_info());
 
         SDL_RenderPresent(renderer);
     }
