@@ -26,7 +26,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x03] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x04] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x05] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x06] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x06] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_b, 2 };
     //opcode_table[0x07] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x08] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x09] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -34,7 +34,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x0B] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x0C] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x0D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    opcode_table[0x0E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_c, 2};
+    opcode_table[0x0E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_c, 2 };
     //opcode_table[0x0F] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     //opcode_table[0x10] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -43,7 +43,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x13] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x14] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x15] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x16] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x16] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_d, 2 };
     //opcode_table[0x17] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x18] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x19] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -51,7 +51,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x1B] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x1C] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x1D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x1E] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x1E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_e, 2 };
     //opcode_table[0x1F] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     //opcode_table[0x20] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -60,7 +60,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x23] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x24] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x25] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x26] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x26] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_h, 2 };
     //opcode_table[0x27] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x28] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x29] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -68,7 +68,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x2B] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x2C] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x2D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x2E] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x2E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_l, 2 };
     //opcode_table[0x2F] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     //opcode_table[0x30] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -77,7 +77,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x33] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x34] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x35] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x36] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x36] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_indirect_hl, 3 };
     //opcode_table[0x37] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x38] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x39] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -85,7 +85,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x3B] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x3C] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x3D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x3E] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x3E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld, &Cpu::store_to_a, 2 };
     //opcode_table[0x3F] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     //opcode_table[0x40] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -655,6 +655,12 @@ int Cpu::ld() {
 
 // ----------------------------------------------------------------------------
 
+void Cpu::store_to_a() {
+    a = computed_u8;
+}
+
+// ----------------------------------------------------------------------------
+
 void Cpu::store_to_b() {
     b = computed_u8;
 }
@@ -663,4 +669,40 @@ void Cpu::store_to_b() {
 
 void Cpu::store_to_c() {
     c = computed_u8;
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_to_d() {
+    d = computed_u8;
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_to_e() {
+    e = computed_u8;
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_to_h() {
+    h = computed_u8;
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_to_l() {
+    l = computed_u8;
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_indirect_hl() {
+    bus->cpu_write(get_hl(), computed_u8);
+}
+
+// ----------------------------------------------------------------------------
+
+Uint16 Cpu::get_hl() {
+    return (static_cast<Uint16>(h) << 8) | static_cast<Uint16>(l);
 }

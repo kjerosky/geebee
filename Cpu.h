@@ -80,8 +80,16 @@ private:
     int ld();
 
     // opcode store functions
+    void store_to_a();
     void store_to_b();
     void store_to_c();
+    void store_to_d();
+    void store_to_e();
+    void store_to_h();
+    void store_to_l();
+    void store_indirect_hl();
+
+    Uint16 get_hl();
 };
 
 #endif
