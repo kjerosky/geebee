@@ -73,7 +73,14 @@ private:
     Uint16 computed_u16;
 
     // opcode fetch functions
+    void fetch_from_a();
+    void fetch_from_b();
     void fetch_from_c();
+    void fetch_from_d();
+    void fetch_from_e();
+    void fetch_from_h();
+    void fetch_from_l();
+    void fetch_indirect_hl();
     void fetch_from_immediate_u8();
 
     // opcode execute functions
