@@ -81,7 +81,14 @@ private:
     void fetch_from_h();
     void fetch_from_l();
     void fetch_indirect_hl();
+    void fetch_indirect_hl_plus();
+    void fetch_indirect_hl_minus();
+    void fetch_indirect_bc();
+    void fetch_indirect_de();
+    void fetch_direct_ff_offset();
+    void fetch_indirect_ff_with_c_offset();
     void fetch_from_immediate_u8();
+    void fetch_direct();
 
     // opcode execute functions
     int ld();
@@ -95,8 +102,17 @@ private:
     void store_to_h();
     void store_to_l();
     void store_indirect_hl();
+    void store_indirect_hl_plus();
+    void store_indirect_hl_minus();
+    void store_indirect_bc();
+    void store_indirect_de();
+    void store_direct_ff_offset();
+    void store_indirect_ff_with_c_offset();
+    void store_direct();
 
     Uint16 get_hl();
+    Uint16 get_bc();
+    Uint16 get_de();
 };
 
 #endif
