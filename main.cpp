@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
 
     // setup ram contents for testing
     std::stringstream ss;
-    ss << "31 00 00 F8 FF";
+    ss << "21 FF 01 36 0A 3E CC A6 36 01 A6";
 
     uint16_t nOffset = initial_pc;
     while (!ss.eof())

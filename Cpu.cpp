@@ -190,14 +190,14 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x9E] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0x9F] = { &Cpu::, &Cpu::, &Cpu::,  };
 
-    //opcode_table[0xA0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA7] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xA0] = { &Cpu::fetch_from_b, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA1] = { &Cpu::fetch_from_c, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA2] = { &Cpu::fetch_from_d, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA3] = { &Cpu::fetch_from_e, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA4] = { &Cpu::fetch_from_h, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA5] = { &Cpu::fetch_from_l, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA6] = { &Cpu::fetch_indirect_hl, &Cpu::and_with_a, &Cpu::store_to_a, 2 };
+    opcode_table[0xA7] = { &Cpu::fetch_from_a, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
     //opcode_table[0xA8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xA9] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xAA] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -264,7 +264,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xE3] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xE4] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xE5] = { &Cpu::fetch_from_hl, &Cpu::ld_16bit, &Cpu::push, 4 };
-    //opcode_table[0xE6] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xE6] = { &Cpu::fetch_from_immediate_u8, &Cpu::and_with_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xE7] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xE8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xE9] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -832,6 +832,17 @@ int Cpu::ld_8bit() {
 int Cpu::ld_16bit() {
     computed_u16_msb = fetched_u16_msb;
     computed_u16_lsb = fetched_u16_lsb;
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::and_with_a() {
+    computed_u8 = a & fetched_u8;
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, true);
+    set_flag(C_FLAG, false);
     return 0;
 }
 

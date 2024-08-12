@@ -108,6 +108,7 @@ private:
     // opcode execute functions
     int ld_8bit();
     int ld_16bit();
+    int and_with_a();
 
     // opcode store functions
     void store_to_a();
