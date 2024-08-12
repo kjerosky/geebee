@@ -111,6 +111,8 @@ private:
     int and_with_a();
     int xor_with_a();
     int or_with_a();
+    int inc_8bit();
+    int inc_16bit();
 
     // opcode store functions
     void store_to_a();
@@ -141,6 +143,8 @@ private:
     Uint16 get_de();
 
     Uint32 add_and_track_carries(Uint32 a, Uint32 b, Uint32& carries);
+    Uint16 get_fetched_u16();
+    void split_u16(Uint16 u16, Uint8& msb, Uint8& lsb);
 };
 
 #endif

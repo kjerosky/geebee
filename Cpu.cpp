@@ -23,8 +23,8 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x00] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x01] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_bc, 3 };
     opcode_table[0x02] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_bc, 2 };
-    //opcode_table[0x03] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x04] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x03] = { &Cpu::fetch_from_bc, &Cpu::inc_16bit, &Cpu::store_to_bc, 2 };
+    opcode_table[0x04] = { &Cpu::fetch_from_b, &Cpu::inc_8bit, &Cpu::store_to_b, 1 };
     //opcode_table[0x05] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x06] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_b, 2 };
     //opcode_table[0x07] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -32,7 +32,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x09] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x0A] = { &Cpu::fetch_indirect_bc, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     //opcode_table[0x0B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x0C] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x0C] = { &Cpu::fetch_from_c, &Cpu::inc_8bit, &Cpu::store_to_c, 1 };
     //opcode_table[0x0D] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x0E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_c, 2 };
     //opcode_table[0x0F] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -40,8 +40,8 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x10] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x11] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
     opcode_table[0x12] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_de, 2 };
-    //opcode_table[0x13] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x14] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x13] = { &Cpu::fetch_from_de, &Cpu::inc_16bit, &Cpu::store_to_de, 2 };
+    opcode_table[0x14] = { &Cpu::fetch_from_d, &Cpu::inc_8bit, &Cpu::store_to_d, 1 };
     //opcode_table[0x15] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x16] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_d, 2 };
     //opcode_table[0x17] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -49,7 +49,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x19] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x1A] = { &Cpu::fetch_indirect_de, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     //opcode_table[0x1B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x1C] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x1C] = { &Cpu::fetch_from_e, &Cpu::inc_8bit, &Cpu::store_to_e, 1 };
     //opcode_table[0x1D] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x1E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_e, 2 };
     //opcode_table[0x1F] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -57,8 +57,8 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x20] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x21] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
     opcode_table[0x22] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_hl_plus, 2 };
-    //opcode_table[0x23] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x24] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x23] = { &Cpu::fetch_from_hl, &Cpu::inc_16bit, &Cpu::store_to_hl, 2 };
+    opcode_table[0x24] = { &Cpu::fetch_from_h, &Cpu::inc_8bit, &Cpu::store_to_h, 1 };
     //opcode_table[0x25] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x26] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_h, 2 };
     //opcode_table[0x27] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -66,7 +66,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x29] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x2A] = { &Cpu::fetch_indirect_hl_plus, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     //opcode_table[0x2B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x2C] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x2C] = { &Cpu::fetch_from_l, &Cpu::inc_8bit, &Cpu::store_to_l, 1 };
     //opcode_table[0x2D] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x2E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_l, 2 };
     //opcode_table[0x2F] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -74,8 +74,8 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x30] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x31] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_sp, 3 };
     opcode_table[0x32] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_hl_minus, 2 };
-    //opcode_table[0x33] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x34] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x33] = { &Cpu::fetch_from_sp, &Cpu::inc_16bit, &Cpu::store_to_sp, 2 };
+    opcode_table[0x34] = { &Cpu::fetch_indirect_hl, &Cpu::inc_8bit, &Cpu::store_indirect_hl, 3 };
     //opcode_table[0x35] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x36] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 3 };
     //opcode_table[0x37] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -83,7 +83,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0x39] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x3A] = { &Cpu::fetch_indirect_hl_minus, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     //opcode_table[0x3B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x3C] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x3C] = { &Cpu::fetch_from_a, &Cpu::inc_8bit, &Cpu::store_to_a, 1 };
     //opcode_table[0x3D] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x3E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     //opcode_table[0x3F] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -719,6 +719,7 @@ void Cpu::fetch_from_af() {
 // ----------------------------------------------------------------------------
 
 void Cpu::fetch_from_sp() {
+    //TODO REPLACE WITH split_u16
     fetched_u16_msb = static_cast<Uint8>((sp >> 8) & 0x00FF);
     fetched_u16_lsb = static_cast<Uint8>(sp & 0x00FF);
 }
@@ -735,6 +736,7 @@ void Cpu::fetch_indirect_hl_plus() {
     fetched_u8 = bus->cpu_read(get_hl());
 
     Uint16 new_hl = get_hl() + 0x01;
+    //TODO REPLACE WITH split_u16
     h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
     l = static_cast<Uint8>(new_hl & 0x00FF);
 }
@@ -745,6 +747,7 @@ void Cpu::fetch_indirect_hl_minus() {
     fetched_u8 = bus->cpu_read(get_hl());
 
     Uint16 new_hl = get_hl() - 0x01;
+    //TODO REPLACE WITH split_u16
     h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
     l = static_cast<Uint8>(new_hl & 0x00FF);
 }
@@ -812,6 +815,7 @@ void Cpu::fetch_from_adjusted_sp() {
 
     Uint32 carries;
     Uint32 result = add_and_track_carries(sp, sp_offset, carries);
+    //TODO REPLACE WITH split_u16
     fetched_u16_msb = (result >> 8) & 0x000000FF;
     fetched_u16_lsb = result & 0x000000FF;
     set_flag(Z_FLAG, false);
@@ -865,6 +869,28 @@ int Cpu::or_with_a() {
     set_flag(N_FLAG, false);
     set_flag(H_FLAG, false);
     set_flag(C_FLAG, false);
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::inc_8bit() {
+    Uint32 carries;
+    Uint32 result = add_and_track_carries(fetched_u8, 1, carries);
+
+    computed_u8 = result & 0x000000FF;
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, (carries & (1 << 3)) != 0);
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::inc_16bit() {
+    Uint16 fetched_u16 = get_fetched_u16();
+    Uint16 computed_u16 = fetched_u16 + 1;
+    split_u16(computed_u16, computed_u16_msb, computed_u16_lsb);
     return 0;
 }
 
@@ -956,6 +982,7 @@ void Cpu::store_indirect_hl_plus() {
     store_indirect_hl();
 
     Uint16 new_hl = get_hl() + 0x01;
+    //TODO REPLACE WITH split_u16
     h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
     l = static_cast<Uint8>(new_hl & 0x00FF);
 }
@@ -966,6 +993,7 @@ void Cpu::store_indirect_hl_minus() {
     store_indirect_hl();
 
     Uint16 new_hl = get_hl() - 0x01;
+    //TODO REPLACE WITH split_u16
     h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
     l = static_cast<Uint8>(new_hl & 0x00FF);
 }
@@ -1058,4 +1086,17 @@ Uint32 Cpu::add_and_track_carries(Uint32 a, Uint32 b, Uint32& carries) {
     }
 
     return a + b;
+}
+
+// ----------------------------------------------------------------------------
+
+Uint16 Cpu::get_fetched_u16() {
+    return (static_cast<Uint16>(fetched_u16_msb) << 8) | static_cast<Uint16>(fetched_u16_lsb);
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::split_u16(Uint16 u16, Uint8& msb, Uint8& lsb) {
+    msb = static_cast<Uint8>((u16 >> 8) & 0x00FF);
+    lsb = static_cast<Uint8>(u16 & 0x00FF);
 }
