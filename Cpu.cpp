@@ -719,9 +719,7 @@ void Cpu::fetch_from_af() {
 // ----------------------------------------------------------------------------
 
 void Cpu::fetch_from_sp() {
-    //TODO REPLACE WITH split_u16
-    fetched_u16_msb = static_cast<Uint8>((sp >> 8) & 0x00FF);
-    fetched_u16_lsb = static_cast<Uint8>(sp & 0x00FF);
+    split_u16(sp, fetched_u16_msb, fetched_u16_lsb);
 }
 
 // ----------------------------------------------------------------------------
@@ -736,9 +734,7 @@ void Cpu::fetch_indirect_hl_plus() {
     fetched_u8 = bus->cpu_read(get_hl());
 
     Uint16 new_hl = get_hl() + 0x01;
-    //TODO REPLACE WITH split_u16
-    h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
-    l = static_cast<Uint8>(new_hl & 0x00FF);
+    split_u16(new_hl, h, l);
 }
 
 // ----------------------------------------------------------------------------
@@ -747,9 +743,7 @@ void Cpu::fetch_indirect_hl_minus() {
     fetched_u8 = bus->cpu_read(get_hl());
 
     Uint16 new_hl = get_hl() - 0x01;
-    //TODO REPLACE WITH split_u16
-    h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
-    l = static_cast<Uint8>(new_hl & 0x00FF);
+    split_u16(new_hl, h, l);
 }
 
 // ----------------------------------------------------------------------------
@@ -796,7 +790,7 @@ void Cpu::fetch_from_immediate_u16() {
 void Cpu::fetch_direct() {
     Uint16 least_significant_address_byte = bus->cpu_read(pc++);
     Uint16 most_significant_address_byte = bus->cpu_read(pc++);
-    Uint16 destination_address = (most_significant_address_byte << 8) + least_significant_address_byte;
+    Uint16 destination_address = join_to_u16(most_significant_address_byte, least_significant_address_byte);
     fetched_u8 = bus->cpu_read(destination_address);
 }
 
@@ -815,9 +809,7 @@ void Cpu::fetch_from_adjusted_sp() {
 
     Uint32 carries;
     Uint32 result = add_and_track_carries(sp, sp_offset, carries);
-    //TODO REPLACE WITH split_u16
-    fetched_u16_msb = (result >> 8) & 0x000000FF;
-    fetched_u16_lsb = result & 0x000000FF;
+    split_u16(result, fetched_u16_msb, fetched_u16_lsb);
     set_flag(Z_FLAG, false);
     set_flag(N_FLAG, false);
     set_flag(H_FLAG, (carries & (1 << 3)) != 0);
@@ -888,8 +880,7 @@ int Cpu::inc_8bit() {
 // ----------------------------------------------------------------------------
 
 int Cpu::inc_16bit() {
-    Uint16 fetched_u16 = get_fetched_u16();
-    Uint16 computed_u16 = fetched_u16 + 1;
+    Uint16 computed_u16 = get_fetched_u16() + 1;
     split_u16(computed_u16, computed_u16_msb, computed_u16_lsb);
     return 0;
 }
@@ -960,7 +951,7 @@ void Cpu::store_to_hl() {
 // ----------------------------------------------------------------------------
 
 void Cpu::store_to_sp() {
-    sp = (static_cast<Uint16>(computed_u16_msb) << 8) | static_cast<Uint16>(computed_u16_lsb);
+    sp = join_to_u16(computed_u16_msb, computed_u16_lsb);
 }
 
 // ----------------------------------------------------------------------------
@@ -982,9 +973,7 @@ void Cpu::store_indirect_hl_plus() {
     store_indirect_hl();
 
     Uint16 new_hl = get_hl() + 0x01;
-    //TODO REPLACE WITH split_u16
-    h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
-    l = static_cast<Uint8>(new_hl & 0x00FF);
+    split_u16(new_hl, h, l);
 }
 
 // ----------------------------------------------------------------------------
@@ -993,9 +982,7 @@ void Cpu::store_indirect_hl_minus() {
     store_indirect_hl();
 
     Uint16 new_hl = get_hl() - 0x01;
-    //TODO REPLACE WITH split_u16
-    h = static_cast<Uint8>((new_hl >> 8) & 0x00FF);
-    l = static_cast<Uint8>(new_hl & 0x00FF);
+    split_u16(new_hl, h, l);
 }
 
 // ----------------------------------------------------------------------------
@@ -1029,7 +1016,7 @@ void Cpu::store_indirect_ff_with_c_offset() {
 void Cpu::store_direct_8bit() {
     Uint16 least_significant_address_byte = bus->cpu_read(pc++);
     Uint16 most_significant_address_byte = bus->cpu_read(pc++);
-    Uint16 destination_address = (most_significant_address_byte << 8) + least_significant_address_byte;
+    Uint16 destination_address = join_to_u16(most_significant_address_byte, least_significant_address_byte);
     bus->cpu_write(destination_address, fetched_u8);
 }
 
@@ -1038,7 +1025,7 @@ void Cpu::store_direct_8bit() {
 void Cpu::store_direct_16bit() {
     Uint16 least_significant_address_byte = bus->cpu_read(pc++);
     Uint16 most_significant_address_byte = bus->cpu_read(pc++);
-    Uint16 destination_address = (most_significant_address_byte << 8) + least_significant_address_byte;
+    Uint16 destination_address = join_to_u16(most_significant_address_byte, least_significant_address_byte);
     bus->cpu_write(destination_address, fetched_u16_lsb);
     bus->cpu_write(destination_address + 0x0001, fetched_u16_msb);
 }
@@ -1055,19 +1042,19 @@ void Cpu::push() {
 // ----------------------------------------------------------------------------
 
 Uint16 Cpu::get_hl() {
-    return (static_cast<Uint16>(h) << 8) | static_cast<Uint16>(l);
+    return join_to_u16(h, l);
 }
 
 // ----------------------------------------------------------------------------
 
 Uint16 Cpu::get_bc() {
-    return (static_cast<Uint16>(b) << 8) | static_cast<Uint16>(c);
+    return join_to_u16(b, c);
 }
 
 // ----------------------------------------------------------------------------
 
 Uint16 Cpu::get_de() {
-    return (static_cast<Uint16>(d) << 8) | static_cast<Uint16>(e);
+    return join_to_u16(d, e);
 }
 
 // ----------------------------------------------------------------------------
@@ -1091,7 +1078,7 @@ Uint32 Cpu::add_and_track_carries(Uint32 a, Uint32 b, Uint32& carries) {
 // ----------------------------------------------------------------------------
 
 Uint16 Cpu::get_fetched_u16() {
-    return (static_cast<Uint16>(fetched_u16_msb) << 8) | static_cast<Uint16>(fetched_u16_lsb);
+    return join_to_u16(fetched_u16_msb, fetched_u16_lsb);
 }
 
 // ----------------------------------------------------------------------------
@@ -1099,4 +1086,10 @@ Uint16 Cpu::get_fetched_u16() {
 void Cpu::split_u16(Uint16 u16, Uint8& msb, Uint8& lsb) {
     msb = static_cast<Uint8>((u16 >> 8) & 0x00FF);
     lsb = static_cast<Uint8>(u16 & 0x00FF);
+}
+
+// ----------------------------------------------------------------------------
+
+Uint16 Cpu::join_to_u16(Uint8 msb, Uint8 lsb) {
+    return (static_cast<Uint16>(msb) << 8) | static_cast<Uint16>(lsb);
 }

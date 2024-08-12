@@ -145,6 +145,7 @@ private:
     Uint32 add_and_track_carries(Uint32 a, Uint32 b, Uint32& carries);
     Uint16 get_fetched_u16();
     void split_u16(Uint16 u16, Uint8& msb, Uint8& lsb);
+    Uint16 join_to_u16(Uint8 msb, Uint8 lsb);
 };
 
 #endif
