@@ -198,14 +198,14 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xA5] = { &Cpu::fetch_from_l, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
     opcode_table[0xA6] = { &Cpu::fetch_indirect_hl, &Cpu::and_with_a, &Cpu::store_to_a, 2 };
     opcode_table[0xA7] = { &Cpu::fetch_from_a, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
-    //opcode_table[0xA8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xA9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xAA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xAB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xAC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xAD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xAE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xAF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xA8] = { &Cpu::fetch_from_b, &Cpu::xor_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xA9] = { &Cpu::fetch_from_c, &Cpu::xor_with_a, &Cpu::store_to_a, 2 };
+    opcode_table[0xAA] = { &Cpu::fetch_from_d, &Cpu::xor_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xAB] = { &Cpu::fetch_from_e, &Cpu::xor_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xAC] = { &Cpu::fetch_from_h, &Cpu::xor_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xAD] = { &Cpu::fetch_from_l, &Cpu::xor_with_a, &Cpu::store_to_a, 1 };
+    opcode_table[0xAE] = { &Cpu::fetch_indirect_hl, &Cpu::xor_with_a, &Cpu::store_to_a, 2 };
+    opcode_table[0xAF] = { &Cpu::fetch_from_a, &Cpu::xor_with_a, &Cpu::store_to_a, 1 };
 
     //opcode_table[0xB0] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xB1] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -272,7 +272,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xEB] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xEC] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xED] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xEE] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xEE] = { &Cpu::fetch_from_immediate_u8, &Cpu::xor_with_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xEF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     opcode_table[0xF0] = { &Cpu::fetch_direct_ff_offset, &Cpu::ld_8bit, &Cpu::store_to_a, 3 };
@@ -842,6 +842,17 @@ int Cpu::and_with_a() {
     set_flag(Z_FLAG, computed_u8 == 0);
     set_flag(N_FLAG, false);
     set_flag(H_FLAG, true);
+    set_flag(C_FLAG, false);
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::xor_with_a() {
+    computed_u8 = a ^ fetched_u8;
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
     set_flag(C_FLAG, false);
     return 0;
 }
