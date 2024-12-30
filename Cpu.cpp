@@ -360,209 +360,209 @@ void Cpu::initialize_opcode_tables() {
     prefixed_opcode_table[0x3E] = { &Cpu::fetch_indirect_hl, &Cpu::shift_right_logically, &Cpu::store_indirect_hl, 4 };
     prefixed_opcode_table[0x3F] = { &Cpu::fetch_from_a, &Cpu::shift_right_logically, &Cpu::store_to_a, 2 };
 
-    prefixed_opcode_table[0x40] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x41] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x42] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x43] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x44] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x45] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x46] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x47] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x48] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x49] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x4A] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x4B] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x4C] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x4D] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x4E] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x4F] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x40] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x41] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x42] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x43] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x44] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x45] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x46] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x47] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x48] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x49] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x4A] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x4B] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x4C] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x4D] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x4E] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x4F] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
 
-    prefixed_opcode_table[0x50] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x51] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x52] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x53] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x54] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x55] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x56] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x57] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x58] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x59] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x5A] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x5B] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x5C] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x5D] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x5E] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x5F] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x50] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x51] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x52] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x53] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x54] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x55] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x56] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x57] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x58] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x59] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x5A] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x5B] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x5C] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x5D] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x5E] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x5F] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
 
-    prefixed_opcode_table[0x60] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x61] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x62] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x63] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x64] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x65] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x66] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x67] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x68] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x69] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x6A] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x6B] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x6C] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x6D] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x6E] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x6F] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x60] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x61] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x62] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x63] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x64] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x65] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x66] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x67] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x68] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x69] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x6A] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x6B] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x6C] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x6D] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x6E] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x6F] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
 
-    prefixed_opcode_table[0x70] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x71] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x72] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x73] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x74] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x75] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x76] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x77] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x78] = { &Cpu::fetch_from_b, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x79] = { &Cpu::fetch_from_c, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x7A] = { &Cpu::fetch_from_d, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x7B] = { &Cpu::fetch_from_e, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x7C] = { &Cpu::fetch_from_h, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x7D] = { &Cpu::fetch_from_l, &Cpu::bit, &Cpu::store_nop, 2 };
-    prefixed_opcode_table[0x7E] = { &Cpu::fetch_indirect_hl, &Cpu::bit, &Cpu::store_nop, 3 };
-    prefixed_opcode_table[0x7F] = { &Cpu::fetch_from_a, &Cpu::bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x70] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x71] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x72] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x73] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x74] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x75] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x76] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x77] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x78] = { &Cpu::fetch_from_b, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x79] = { &Cpu::fetch_from_c, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x7A] = { &Cpu::fetch_from_d, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x7B] = { &Cpu::fetch_from_e, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x7C] = { &Cpu::fetch_from_h, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x7D] = { &Cpu::fetch_from_l, &Cpu::test_bit, &Cpu::store_nop, 2 };
+    prefixed_opcode_table[0x7E] = { &Cpu::fetch_indirect_hl, &Cpu::test_bit, &Cpu::store_nop, 3 };
+    prefixed_opcode_table[0x7F] = { &Cpu::fetch_from_a, &Cpu::test_bit, &Cpu::store_nop, 2 };
 
-    //prefixed_opcode_table[0x80] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x81] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x82] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x83] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x84] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x85] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x86] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x87] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x88] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x89] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x8A] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x8B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x8C] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x8D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x8E] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x8F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0x80] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x81] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x82] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x83] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x84] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x85] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x86] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x87] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0x88] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x89] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x8A] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x8B] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x8C] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x8D] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x8E] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x8F] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0x90] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x91] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x92] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x93] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x94] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x95] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x96] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x97] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x98] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x99] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x9A] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x9B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x9C] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x9D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x9E] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x9F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0x90] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x91] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x92] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x93] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x94] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x95] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x96] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x97] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0x98] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x99] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x9A] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x9B] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x9C] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x9D] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x9E] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x9F] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0xA0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xA9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xAA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xAB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xAC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xAD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xAE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xAF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0xA0] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xA1] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xA2] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xA3] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xA4] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xA5] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xA6] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xA7] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0xA8] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xA9] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xAA] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xAB] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xAC] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xAD] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xAE] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xAF] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0xB0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xB9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xBA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xBB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xBC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xBD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xBE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xBF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0xB0] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xB1] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xB2] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xB3] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xB4] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xB5] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xB6] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xB7] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0xB8] = { &Cpu::fetch_from_b, &Cpu::reset_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xB9] = { &Cpu::fetch_from_c, &Cpu::reset_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xBA] = { &Cpu::fetch_from_d, &Cpu::reset_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xBB] = { &Cpu::fetch_from_e, &Cpu::reset_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xBC] = { &Cpu::fetch_from_h, &Cpu::reset_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xBD] = { &Cpu::fetch_from_l, &Cpu::reset_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xBE] = { &Cpu::fetch_indirect_hl, &Cpu::reset_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xBF] = { &Cpu::fetch_from_a, &Cpu::reset_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0xC0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xC9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xCA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xCB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xCC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xCD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xCE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xCF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0xC0] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xC1] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xC2] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xC3] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xC4] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xC5] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xC6] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xC7] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0xC8] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xC9] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xCA] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xCB] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xCC] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xCD] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xCE] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xCF] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0xD0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xDA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xDB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xDC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xDD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xDE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xDF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0xD0] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xD1] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xD2] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xD3] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xD4] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xD5] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xD6] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xD7] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0xD8] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xD9] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xDA] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xDB] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xDC] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xDD] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xDE] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xDF] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0xE0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xE9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xEA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xEB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xEC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xED] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xEE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xEF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0xE0] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xE1] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xE2] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xE3] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xE4] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xE5] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xE6] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xE7] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0xE8] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xE9] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xEA] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xEB] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xEC] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xED] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xEE] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xEF] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0xF0] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF1] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF4] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF5] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF6] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xF9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xFA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xFB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xFC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xFD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xFE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0xFF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0xF0] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xF1] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xF2] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xF3] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xF4] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xF5] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xF6] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xF7] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0xF8] = { &Cpu::fetch_from_b, &Cpu::set_bit, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0xF9] = { &Cpu::fetch_from_c, &Cpu::set_bit, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0xFA] = { &Cpu::fetch_from_d, &Cpu::set_bit, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0xFB] = { &Cpu::fetch_from_e, &Cpu::set_bit, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0xFC] = { &Cpu::fetch_from_h, &Cpu::set_bit, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0xFD] = { &Cpu::fetch_from_l, &Cpu::set_bit, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0xFE] = { &Cpu::fetch_indirect_hl, &Cpu::set_bit, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0xFF] = { &Cpu::fetch_from_a, &Cpu::set_bit, &Cpu::store_to_a, 2 };
 }
 
 // ----------------------------------------------------------------------------
@@ -583,90 +583,10 @@ void Cpu::set_flag(FLAGS flag, bool value) {
 
 // ----------------------------------------------------------------------------
 
-void Cpu::set_test_bit(Uint8 prefixed_opcode_byte) {
-    switch (prefixed_opcode_byte) {
-        case 0x40:
-        case 0x41:
-        case 0x42:
-        case 0x43:
-        case 0x44:
-        case 0x45:
-        case 0x46:
-        case 0x47:
-            test_bit = 0;
-            break;
-        case 0x48:
-        case 0x49:
-        case 0x4A:
-        case 0x4B:
-        case 0x4C:
-        case 0x4D:
-        case 0x4E:
-        case 0x4F:
-            test_bit = 1;
-            break;
-        case 0x50:
-        case 0x51:
-        case 0x52:
-        case 0x53:
-        case 0x54:
-        case 0x55:
-        case 0x56:
-        case 0x57:
-            test_bit = 2;
-            break;
-        case 0x58:
-        case 0x59:
-        case 0x5A:
-        case 0x5B:
-        case 0x5C:
-        case 0x5D:
-        case 0x5E:
-        case 0x5F:
-            test_bit = 3;
-            break;
-        case 0x60:
-        case 0x61:
-        case 0x62:
-        case 0x63:
-        case 0x64:
-        case 0x65:
-        case 0x66:
-        case 0x67:
-            test_bit = 4;
-            break;
-        case 0x68:
-        case 0x69:
-        case 0x6A:
-        case 0x6B:
-        case 0x6C:
-        case 0x6D:
-        case 0x6E:
-        case 0x6F:
-            test_bit = 5;
-            break;
-        case 0x70:
-        case 0x71:
-        case 0x72:
-        case 0x73:
-        case 0x74:
-        case 0x75:
-        case 0x76:
-        case 0x77:
-            test_bit = 6;
-            break;
-        case 0x78:
-        case 0x79:
-        case 0x7A:
-        case 0x7B:
-        case 0x7C:
-        case 0x7D:
-        case 0x7E:
-        case 0x7F:
-            test_bit = 7;
-            break;
-        default:
-            break;
+void Cpu::set_target_bit(Uint8 prefixed_opcode_byte) {
+    target_bit = ((prefixed_opcode_byte & 0x30) >> 4) << 1;
+    if (prefixed_opcode_byte & 0x08) {
+        target_bit++;
     }
 }
 
@@ -682,7 +602,7 @@ void Cpu::clock() {
             opcode_byte = bus->cpu_read(pc++);
             opcode = prefixed_opcode_table[opcode_byte];
 
-            set_test_bit(opcode_byte);
+            set_target_bit(opcode_byte);
         } else {
             opcode = opcode_table[opcode_byte];
         }
@@ -1310,11 +1230,25 @@ int Cpu::swap() {
 
 // ----------------------------------------------------------------------------
 
-int Cpu::bit() {
-    set_flag(Z_FLAG, (fetched_u8 & (1 << test_bit)) == 0);
+int Cpu::test_bit() {
+    set_flag(Z_FLAG, (fetched_u8 & (1 << target_bit)) == 0);
     set_flag(N_FLAG, false);
     set_flag(H_FLAG, true);
 
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::reset_bit() {
+    computed_u8 = fetched_u8 & ~(1 << target_bit);
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::set_bit() {
+    computed_u8 = fetched_u8 | (1 << target_bit);
     return 0;
 }
 
