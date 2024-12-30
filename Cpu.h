@@ -123,6 +123,8 @@ private:
     int add_to_a_with_carry();
     int add_to_hl();
     int add_to_sp();
+    int subtract_from_a();
+    int subtract_from_a_with_carry();
 
     // opcode store functions
     void store_nop();
@@ -155,7 +157,7 @@ private:
 
     Uint32 full_add_8bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
     Uint32 full_add_16bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
-    Uint32 full_sub(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
+    Uint32 full_sub_8bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
     Uint16 get_fetched_u16();
     void split_u16(Uint16 u16, Uint8& msb, Uint8& lsb);
     Uint16 join_to_u16(Uint8 msb, Uint8 lsb);

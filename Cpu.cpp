@@ -173,22 +173,22 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x8E] = { &Cpu::fetch_indirect_hl, &Cpu::add_to_a_with_carry, &Cpu::store_to_a, 2 };
     opcode_table[0x8F] = { &Cpu::fetch_from_a, &Cpu::add_to_a_with_carry, &Cpu::store_to_a, 1 };
 
-    //opcode_table[0x90] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x91] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x92] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x93] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x94] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x95] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x96] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x97] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x98] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x99] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x9A] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x9B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x9C] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x9D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x9E] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x9F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x90] = { &Cpu::fetch_from_b, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x91] = { &Cpu::fetch_from_c, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x92] = { &Cpu::fetch_from_d, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x93] = { &Cpu::fetch_from_e, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x94] = { &Cpu::fetch_from_h, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x95] = { &Cpu::fetch_from_l, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x96] = { &Cpu::fetch_indirect_hl, &Cpu::subtract_from_a, &Cpu::store_to_a, 2 };
+    opcode_table[0x97] = { &Cpu::fetch_from_a, &Cpu::subtract_from_a, &Cpu::store_to_a, 1 };
+    opcode_table[0x98] = { &Cpu::fetch_from_b, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
+    opcode_table[0x99] = { &Cpu::fetch_from_c, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
+    opcode_table[0x9A] = { &Cpu::fetch_from_d, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
+    opcode_table[0x9B] = { &Cpu::fetch_from_e, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
+    opcode_table[0x9C] = { &Cpu::fetch_from_h, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
+    opcode_table[0x9D] = { &Cpu::fetch_from_l, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
+    opcode_table[0x9E] = { &Cpu::fetch_indirect_hl, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 2 };
+    opcode_table[0x9F] = { &Cpu::fetch_from_a, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 1 };
 
     opcode_table[0xA0] = { &Cpu::fetch_from_b, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
     opcode_table[0xA1] = { &Cpu::fetch_from_c, &Cpu::and_with_a, &Cpu::store_to_a, 1 };
@@ -247,7 +247,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xD3] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD4] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xD5] = { &Cpu::fetch_from_de, &Cpu::ld_16bit, &Cpu::push, 4 };
-    //opcode_table[0xD6] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xD6] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xD7] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -255,7 +255,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xDB] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xDC] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xDD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xDE] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xDE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 2 };
     //opcode_table[0xDF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     opcode_table[0xE0] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_direct_ff_offset, 3 };
@@ -910,7 +910,7 @@ int Cpu::inc_16bit() {
 int Cpu::dec_8bit() {
     bool half_carry;
     bool carry;
-    Uint32 result = full_sub(fetched_u8, 1, 0, half_carry, carry);
+    Uint32 result = full_sub_8bit(fetched_u8, 1, 0, half_carry, carry);
 
     computed_u8 = result & 0x000000FF;
     set_flag(Z_FLAG, computed_u8 == 0);
@@ -990,6 +990,37 @@ int Cpu::add_to_sp() {
     set_flag(H_FLAG, half_carry_8bit);
     set_flag(C_FLAG, carry_8bit);
     return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::subtract_from_a() {
+    bool half_carry;
+    bool carry;
+    Uint32 result = full_sub_8bit(a, fetched_u8, 0, half_carry, carry);
+
+    computed_u8 = result & 0x000000FF;
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, true);
+    set_flag(H_FLAG, half_carry);
+    set_flag(C_FLAG, carry);
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::subtract_from_a_with_carry() {
+    bool half_carry;
+    bool carry;
+    Uint32 result = full_sub_8bit(a, fetched_u8, get_flag(C_FLAG), half_carry, carry);
+
+    computed_u8 = result & 0x000000FF;
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, true);
+    set_flag(H_FLAG, half_carry);
+    set_flag(C_FLAG, carry);
+    return 0;
+    //todo
 }
 
 // ----------------------------------------------------------------------------
@@ -1192,7 +1223,7 @@ Uint32 Cpu::full_add_16bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_o
 
 // ----------------------------------------------------------------------------
 
-Uint32 Cpu::full_sub(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out) {
+Uint32 Cpu::full_sub_8bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out) {
     Uint32 carry = carry_in ? 1 : 0;
     half_carry_out = (((a & 0xF) - (b & 0xF) - carry) & 0x10) != 0;
     carry_out = (((a & 0xFF) - (b & 0xFF) - carry) & 0x100) != 0;
