@@ -48,6 +48,7 @@ private:
     void initialize_opcode_tables();
     bool get_flag(FLAGS flag);
     void set_flag(FLAGS flag, bool value);
+    void set_test_bit(Uint8 prefixed_opcode_byte);
 
     Bus* bus;
 
@@ -82,6 +83,7 @@ private:
     Uint8 computed_u16_msb;
 
     bool is_current_opcode_prefixed;
+    int test_bit;
 
     // opcode fetch functions
     void fetch_nop();
@@ -139,6 +141,8 @@ private:
     int shift_left_arithmetically();
     int shift_right_arithmetically();
     int shift_right_logically();
+    int swap();
+    int bit();
 
     // opcode store functions
     void store_nop();
