@@ -215,14 +215,14 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xB5] = { &Cpu::fetch_from_l, &Cpu::or_with_a, &Cpu::store_to_a, 1 };
     opcode_table[0xB6] = { &Cpu::fetch_indirect_hl, &Cpu::or_with_a, &Cpu::store_to_a, 2 };
     opcode_table[0xB7] = { &Cpu::fetch_from_a, &Cpu::or_with_a, &Cpu::store_to_a, 1 };
-    //opcode_table[0xB8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xB9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xBA] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xBB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xBC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xBD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xBE] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xBF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xB8] = { &Cpu::fetch_from_b, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
+    opcode_table[0xB9] = { &Cpu::fetch_from_c, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
+    opcode_table[0xBA] = { &Cpu::fetch_from_d, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
+    opcode_table[0xBB] = { &Cpu::fetch_from_e, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
+    opcode_table[0xBC] = { &Cpu::fetch_from_h, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
+    opcode_table[0xBD] = { &Cpu::fetch_from_l, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
+    opcode_table[0xBE] = { &Cpu::fetch_indirect_hl, &Cpu::subtract_from_a, &Cpu::store_nop, 2 };
+    opcode_table[0xBF] = { &Cpu::fetch_from_a, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
 
     //opcode_table[0xC0] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xC1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_bc, 3 };
@@ -289,7 +289,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xFB] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xFC] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xFD] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xFE] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xFE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_nop, 2 };
     //opcode_table[0xFF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     //prefixed_opcode_table[0x00] = { &Cpu::, &Cpu::, &Cpu::,  };
