@@ -81,6 +81,8 @@ private:
     Uint8 computed_u16_lsb;
     Uint8 computed_u16_msb;
 
+    bool is_current_opcode_prefixed;
+
     // opcode fetch functions
     void fetch_nop();
     void fetch_from_a();
