@@ -82,6 +82,7 @@ private:
     Uint8 computed_u16_msb;
 
     // opcode fetch functions
+    void fetch_nop();
     void fetch_from_a();
     void fetch_from_b();
     void fetch_from_c();
@@ -108,6 +109,7 @@ private:
     void fetch_from_adjusted_sp();
 
     // opcode execute functions
+    int exec_nop();
     int ld_8bit();
     int ld_16bit();
     int and_with_a();
@@ -119,6 +121,7 @@ private:
     int dec_16bit();
 
     // opcode store functions
+    void store_nop();
     void store_to_a();
     void store_to_b();
     void store_to_c();

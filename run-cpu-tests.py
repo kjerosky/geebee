@@ -3,7 +3,7 @@ import os
 import subprocess
 import argparse
 import sys
-import tqdm
+from tqdm import tqdm
 
 def serialize_gameboy_state(gameboy_state: dict) -> str:
     serialized_state = str(gameboy_state['pc']) + ' '
@@ -65,10 +65,13 @@ else:
 test_count = 0
 failed_test_count = 0
 failed_test_names = []
+failed_test_files = []
 for test_file in test_files:
     with open(test_file) as file:
+        base_test_file_name = os.path.basename(test_file)
         test_data = json.load(file)
-        for test in tqdm.tqdm(test_data, desc=os.path.basename(test_file)):
+        are_any_failed_tests = False
+        for test in tqdm(test_data, desc=os.path.basename(base_test_file_name)):
             test_count += 1
             test_name = test['name']
             serialized_initial_state = serialize_gameboy_state(test['initial'])
@@ -77,11 +80,21 @@ for test_file in test_files:
 
             result = subprocess.run('./run-cpu-test', input=test_input)
             if result.returncode != 0:
+                are_any_failed_tests = True
                 failed_test_count += 1
                 failed_test_names.append(test_name)
 
+        if are_any_failed_tests:
+            failed_test_files.append(base_test_file_name)
+
 for failed_test_name in failed_test_names:
     print('Test ' + failed_test_name + ': [FAILED]')
+if len(failed_test_files) > 0:
+    print()
+    print('Failures found in these files:')
+    for failed_test_file in failed_test_files:
+        print(failed_test_file)
+print()
 print('Total tests run: ' + str(test_count))
 print('Tests passed: ' + str(test_count - failed_test_count))
 print('Tests failed: ' + str(failed_test_count))

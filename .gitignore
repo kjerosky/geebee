@@ -1,4 +1,7 @@
 geebee
 run-cpu-test
 
+geebee.dSYM
+run-cpu-test.dSYM
+
 .vscode

@@ -1,6 +1,5 @@
 #include "Cpu.h"
 #include "Bus.h"
-#include <iostream>//TODO
 
 Cpu::Cpu(Bus* bus)
         : bus(bus),
@@ -21,7 +20,7 @@ Cpu::~Cpu() {
 // ----------------------------------------------------------------------------
 
 void Cpu::initialize_opcode_tables() {
-    //opcode_table[0x00] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x00] = { &Cpu::fetch_nop, &Cpu::exec_nop, &Cpu::store_nop, 1 };
     opcode_table[0x01] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_bc, 3 };
     opcode_table[0x02] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_bc, 2 };
     opcode_table[0x03] = { &Cpu::fetch_from_bc, &Cpu::inc_16bit, &Cpu::store_to_bc, 2 };
@@ -649,6 +648,12 @@ Cpu_Info Cpu::get_cpu_info() {
 
 // ----------------------------------------------------------------------------
 
+void Cpu::fetch_nop() {
+    // intentionally do nothing
+}
+
+// ----------------------------------------------------------------------------
+
 void Cpu::fetch_from_a() {
     fetched_u8 = a;
 }
@@ -820,6 +825,13 @@ void Cpu::fetch_from_adjusted_sp() {
 
 // ----------------------------------------------------------------------------
 
+int Cpu::exec_nop() {
+    // intentionally do nothing
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
 int Cpu::ld_8bit() {
     computed_u8 = fetched_u8;
     return 0;
@@ -897,7 +909,7 @@ int Cpu::dec_8bit() {
 
     computed_u8 = result & 0x000000FF;
     set_flag(Z_FLAG, computed_u8 == 0);
-    set_flag(N_FLAG, false);
+    set_flag(N_FLAG, true);
     set_flag(H_FLAG, half_carry);
     return 0;
 }
@@ -908,6 +920,12 @@ int Cpu::dec_16bit() {
     Uint16 computed_u16 = get_fetched_u16() - 1;
     split_u16(computed_u16, computed_u16_msb, computed_u16_lsb);
     return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_nop() {
+    // intentionally do nothing
 }
 
 // ----------------------------------------------------------------------------
