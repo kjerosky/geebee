@@ -27,7 +27,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x04] = { &Cpu::fetch_from_b, &Cpu::inc_8bit, &Cpu::store_to_b, 1 };
     opcode_table[0x05] = { &Cpu::fetch_from_b, &Cpu::dec_8bit, &Cpu::store_to_b, 1 };
     opcode_table[0x06] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_b, 2 };
-    //opcode_table[0x07] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x07] = { &Cpu::fetch_from_a, &Cpu::rotate_left, &Cpu::store_to_a, 1 };
     opcode_table[0x08] = { &Cpu::fetch_from_sp, &Cpu::ld_16bit, &Cpu::store_direct_16bit, 5 };
     opcode_table[0x09] = { &Cpu::fetch_from_bc, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x0A] = { &Cpu::fetch_indirect_bc, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
@@ -35,7 +35,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x0C] = { &Cpu::fetch_from_c, &Cpu::inc_8bit, &Cpu::store_to_c, 1 };
     opcode_table[0x0D] = { &Cpu::fetch_from_c, &Cpu::dec_8bit, &Cpu::store_to_c, 1 };
     opcode_table[0x0E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_c, 2 };
-    //opcode_table[0x0F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x0F] = { &Cpu::fetch_from_a, &Cpu::rotate_right, &Cpu::store_to_a, 1 };
 
     //opcode_table[0x10] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x11] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
@@ -44,7 +44,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x14] = { &Cpu::fetch_from_d, &Cpu::inc_8bit, &Cpu::store_to_d, 1 };
     opcode_table[0x15] = { &Cpu::fetch_from_d, &Cpu::dec_8bit, &Cpu::store_to_d, 1 };
     opcode_table[0x16] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_d, 2 };
-    //opcode_table[0x17] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x17] = { &Cpu::fetch_from_a, &Cpu::rotate_left_with_carry, &Cpu::store_to_a, 1 };
     //opcode_table[0x18] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x19] = { &Cpu::fetch_from_de, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x1A] = { &Cpu::fetch_indirect_de, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
@@ -52,7 +52,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x1C] = { &Cpu::fetch_from_e, &Cpu::inc_8bit, &Cpu::store_to_e, 1 };
     opcode_table[0x1D] = { &Cpu::fetch_from_e, &Cpu::dec_8bit, &Cpu::store_to_e, 1 };
     opcode_table[0x1E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_e, 2 };
-    //opcode_table[0x1F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x1F] = { &Cpu::fetch_from_a, &Cpu::rotate_right_with_carry, &Cpu::store_to_a, 1 };
 
     //opcode_table[0x20] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0x21] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
@@ -1093,6 +1093,62 @@ int Cpu::jump_absolute_if_c_set() {
     }
 
     return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::rotate_left() {
+    Uint8 bit7 = (fetched_u8 & 0x80) == 0 ? 0 : 1;
+    computed_u8 = (fetched_u8 << 1) | bit7;
+
+    set_flag(Z_FLAG, false);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit7 == 1);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::rotate_left_with_carry() {
+    Uint8 bit7 = (fetched_u8 & 0x80) == 0 ? 0 : 1;
+    computed_u8 = (fetched_u8 << 1) | (get_flag(C_FLAG) ? 1 : 0);
+
+    set_flag(Z_FLAG, false);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit7 == 1);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::rotate_right() {
+    Uint8 bit0 = fetched_u8 & 0x01;
+    computed_u8 = (fetched_u8 >> 1) | (bit0 << 7);
+
+    set_flag(Z_FLAG, false);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit0 == 1);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::rotate_right_with_carry() {
+    Uint8 bit0 = fetched_u8 & 0x01;
+    computed_u8 = (fetched_u8 >> 1) | ((get_flag(C_FLAG) ? 1 : 0) << 7);
+
+    set_flag(Z_FLAG, false);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit0 == 1);
+
+    return 0;
 }
 
 // ----------------------------------------------------------------------------

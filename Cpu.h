@@ -130,6 +130,10 @@ private:
     int jump_absolute_if_c_reset();
     int jump_absolute_if_z_set();
     int jump_absolute_if_c_set();
+    int rotate_left();
+    int rotate_left_with_carry();
+    int rotate_right();
+    int rotate_right_with_carry();
 
     // opcode store functions
     void store_nop();
