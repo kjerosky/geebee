@@ -326,22 +326,22 @@ void Cpu::initialize_opcode_tables() {
     prefixed_opcode_table[0x1E] = { &Cpu::fetch_indirect_hl, &Cpu::rotate_right_with_carry, &Cpu::store_indirect_hl, 4 };
     prefixed_opcode_table[0x1F] = { &Cpu::fetch_from_a, &Cpu::rotate_right_with_carry, &Cpu::store_to_a, 2 };
 
-    //prefixed_opcode_table[0x20] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x21] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x22] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x23] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x24] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x25] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x26] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x27] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x28] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x29] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x2A] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x2B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x2C] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x2D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x2E] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x2F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0x20] = { &Cpu::fetch_from_b, &Cpu::shift_left_arithmetically, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x21] = { &Cpu::fetch_from_c, &Cpu::shift_left_arithmetically, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x22] = { &Cpu::fetch_from_d, &Cpu::shift_left_arithmetically, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x23] = { &Cpu::fetch_from_e, &Cpu::shift_left_arithmetically, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x24] = { &Cpu::fetch_from_h, &Cpu::shift_left_arithmetically, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x25] = { &Cpu::fetch_from_l, &Cpu::shift_left_arithmetically, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x26] = { &Cpu::fetch_indirect_hl, &Cpu::shift_left_arithmetically, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x27] = { &Cpu::fetch_from_a, &Cpu::shift_left_arithmetically, &Cpu::store_to_a, 2 };
+    prefixed_opcode_table[0x28] = { &Cpu::fetch_from_b, &Cpu::shift_right_arithmetically, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x29] = { &Cpu::fetch_from_c, &Cpu::shift_right_arithmetically, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x2A] = { &Cpu::fetch_from_d, &Cpu::shift_right_arithmetically, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x2B] = { &Cpu::fetch_from_e, &Cpu::shift_right_arithmetically, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x2C] = { &Cpu::fetch_from_h, &Cpu::shift_right_arithmetically, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x2D] = { &Cpu::fetch_from_l, &Cpu::shift_right_arithmetically, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x2E] = { &Cpu::fetch_indirect_hl, &Cpu::shift_right_arithmetically, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x2F] = { &Cpu::fetch_from_a, &Cpu::shift_right_arithmetically, &Cpu::store_to_a, 2 };
 
     //prefixed_opcode_table[0x30] = { &Cpu::, &Cpu::, &Cpu::,  };
     //prefixed_opcode_table[0x31] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -351,14 +351,14 @@ void Cpu::initialize_opcode_tables() {
     //prefixed_opcode_table[0x35] = { &Cpu::, &Cpu::, &Cpu::,  };
     //prefixed_opcode_table[0x36] = { &Cpu::, &Cpu::, &Cpu::,  };
     //prefixed_opcode_table[0x37] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x38] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x39] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x3A] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x3B] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x3C] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x3D] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x3E] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //prefixed_opcode_table[0x3F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    prefixed_opcode_table[0x38] = { &Cpu::fetch_from_b, &Cpu::shift_right_logically, &Cpu::store_to_b, 2 };
+    prefixed_opcode_table[0x39] = { &Cpu::fetch_from_c, &Cpu::shift_right_logically, &Cpu::store_to_c, 2 };
+    prefixed_opcode_table[0x3A] = { &Cpu::fetch_from_d, &Cpu::shift_right_logically, &Cpu::store_to_d, 2 };
+    prefixed_opcode_table[0x3B] = { &Cpu::fetch_from_e, &Cpu::shift_right_logically, &Cpu::store_to_e, 2 };
+    prefixed_opcode_table[0x3C] = { &Cpu::fetch_from_h, &Cpu::shift_right_logically, &Cpu::store_to_h, 2 };
+    prefixed_opcode_table[0x3D] = { &Cpu::fetch_from_l, &Cpu::shift_right_logically, &Cpu::store_to_l, 2 };
+    prefixed_opcode_table[0x3E] = { &Cpu::fetch_indirect_hl, &Cpu::shift_right_logically, &Cpu::store_indirect_hl, 4 };
+    prefixed_opcode_table[0x3F] = { &Cpu::fetch_from_a, &Cpu::shift_right_logically, &Cpu::store_to_a, 2 };
 
     //prefixed_opcode_table[0x40] = { &Cpu::, &Cpu::, &Cpu::,  };
     //prefixed_opcode_table[0x41] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -1153,6 +1153,49 @@ int Cpu::rotate_right_with_carry() {
     bool is_z_flag_set = is_current_opcode_prefixed && computed_u8 == 0;
 
     set_flag(Z_FLAG, is_z_flag_set);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit0 == 1);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::shift_left_arithmetically() {
+    Uint8 bit7 = (fetched_u8 & 0x80) == 0 ? 0 : 1;
+    computed_u8 = (fetched_u8 << 1) & 0xFE;
+
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit7 == 1);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::shift_right_arithmetically() {
+    Uint8 preserved_bit7 = fetched_u8 & 0x80;
+    Uint8 bit0 = fetched_u8 & 0x01;
+    computed_u8 = ((fetched_u8 >> 1) & 0x7F) | preserved_bit7;
+
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, bit0 == 1);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::shift_right_logically() {
+    Uint8 bit0 = fetched_u8 & 0x01;
+    computed_u8 = (fetched_u8 >> 1) & 0x7F;
+
+    set_flag(Z_FLAG, computed_u8 == 0);
     set_flag(N_FLAG, false);
     set_flag(H_FLAG, false);
     set_flag(C_FLAG, bit0 == 1);

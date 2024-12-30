@@ -62,6 +62,7 @@ else:
     sys.stderr.write('[ERROR] Please specify either a test directory or a specific test to run!\n')
     exit(1)
 
+test_files.sort()
 test_count = 0
 failed_test_count = 0
 failed_test_names = []

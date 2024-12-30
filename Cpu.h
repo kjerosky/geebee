@@ -136,6 +136,9 @@ private:
     int rotate_left_with_carry();
     int rotate_right();
     int rotate_right_with_carry();
+    int shift_left_arithmetically();
+    int shift_right_arithmetically();
+    int shift_right_logically();
 
     // opcode store functions
     void store_nop();
