@@ -34,6 +34,8 @@ public:
     void reset();
     Cpu_Info get_cpu_info();
 
+    void override_cpu_state(Cpu_Info& new_cpu_state);
+
 private:
 
     enum FLAGS {
@@ -113,6 +115,8 @@ private:
     int or_with_a();
     int inc_8bit();
     int inc_16bit();
+    int dec_8bit();
+    int dec_16bit();
 
     // opcode store functions
     void store_to_a();
@@ -142,7 +146,8 @@ private:
     Uint16 get_bc();
     Uint16 get_de();
 
-    Uint32 add_and_track_carries(Uint32 a, Uint32 b, Uint32& carries);
+    Uint32 full_add(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
+    Uint32 full_sub(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
     Uint16 get_fetched_u16();
     void split_u16(Uint16 u16, Uint8& msb, Uint8& lsb);
     Uint16 join_to_u16(Uint8 msb, Uint8 lsb);

@@ -118,7 +118,7 @@ int main(int argc, char* argv[]) {
 
     // setup ram contents for testing
     std::stringstream ss;
-    ss << "3E AF   21 F0 01   32   3C   32   3C   32";
+    ss << "06 02   05   05   05   05   06 10   05";
 
     uint16_t nOffset = initial_pc;
     while (!ss.eof())
@@ -163,4 +163,3 @@ int main(int argc, char* argv[]) {
     SDL_Quit();
     return 0;
 }
-

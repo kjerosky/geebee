@@ -5,10 +5,16 @@ LIBRARIES = -lSDL2 -lSDL2_image
 FLAGS = -Wall -std=c++11
 SOURCES = main.cpp GameBoy.cpp Bus.cpp Cpu.cpp
 
-all: $(EXECUTABLE)
+TEST_EXECUTABLE = run-cpu-test
+TEST_SOURCES = run-cpu-test.cpp GameBoy.cpp Bus.cpp Cpu.cpp
+
+all: $(EXECUTABLE) $(TEST_EXECUTABLE)
 
 $(EXECUTABLE):
 	g++ $(SOURCES) -o $(EXECUTABLE) $(FLAGS) $(LIBRARY_PATHS) $(LIBRARIES) $(INCLUDE_PATHS)
 
+$(TEST_EXECUTABLE):
+	g++ $(TEST_SOURCES) -o $(TEST_EXECUTABLE) $(FLAGS) $(LIBRARY_PATHS) $(LIBRARIES) $(INCLUDE_PATHS)
+
 clean:
-	rm -rf $(EXECUTABLE)
+	rm -rf $(EXECUTABLE) $(TEST_EXECUTABLE)

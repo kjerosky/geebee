@@ -33,3 +33,9 @@ Cpu_Info GameBoy::get_cpu_info() {
 Uint8* GameBoy::get_ram_contents() {
     return bus->get_ram_contents();
 }
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::override_cpu_state(Cpu_Info& new_cpu_state) {
+    cpu->override_cpu_state(new_cpu_state);
+}

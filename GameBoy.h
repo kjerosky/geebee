@@ -17,6 +17,8 @@ public:
     Cpu_Info get_cpu_info();
     Uint8* get_ram_contents();
 
+    void override_cpu_state(Cpu_Info& new_cpu_state);
+
 private:
 
     Cpu* cpu;
