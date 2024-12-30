@@ -109,7 +109,7 @@ private:
     void fetch_from_adjusted_sp();
 
     // opcode execute functions
-    int exec_nop();
+    int execute_nop();
     int ld_8bit();
     int ld_16bit();
     int and_with_a();
@@ -125,6 +125,11 @@ private:
     int add_to_sp();
     int subtract_from_a();
     int subtract_from_a_with_carry();
+    int jump_absolute();
+    int jump_absolute_if_z_reset();
+    int jump_absolute_if_c_reset();
+    int jump_absolute_if_z_set();
+    int jump_absolute_if_c_set();
 
     // opcode store functions
     void store_nop();
@@ -150,6 +155,7 @@ private:
     void store_direct_8bit();
     void store_direct_16bit();
     void push();
+    void store_to_pc();
 
     Uint16 get_hl();
     Uint16 get_bc();

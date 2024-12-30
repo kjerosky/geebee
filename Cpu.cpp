@@ -20,7 +20,7 @@ Cpu::~Cpu() {
 // ----------------------------------------------------------------------------
 
 void Cpu::initialize_opcode_tables() {
-    opcode_table[0x00] = { &Cpu::fetch_nop, &Cpu::exec_nop, &Cpu::store_nop, 1 };
+    opcode_table[0x00] = { &Cpu::fetch_nop, &Cpu::execute_nop, &Cpu::store_nop, 1 };
     opcode_table[0x01] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_bc, 3 };
     opcode_table[0x02] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_bc, 2 };
     opcode_table[0x03] = { &Cpu::fetch_from_bc, &Cpu::inc_16bit, &Cpu::store_to_bc, 2 };
@@ -226,15 +226,15 @@ void Cpu::initialize_opcode_tables() {
 
     //opcode_table[0xC0] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xC1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_bc, 3 };
-    //opcode_table[0xC2] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xC3] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xC2] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_z_reset, &Cpu::store_to_pc, 3 };
+    opcode_table[0xC3] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute, &Cpu::store_to_pc, 4 };
     //opcode_table[0xC4] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xC5] = { &Cpu::fetch_from_bc, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xC6] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xC7] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xC8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xC9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xCA] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xCA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_z_set, &Cpu::store_to_pc, 3 };
     //opcode_table[0xCB] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xCC] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xCD] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -243,7 +243,7 @@ void Cpu::initialize_opcode_tables() {
 
     //opcode_table[0xD0] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xD1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
-    //opcode_table[0xD2] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xD2] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_reset, &Cpu::store_to_pc, 3 };
     //opcode_table[0xD3] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD4] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xD5] = { &Cpu::fetch_from_de, &Cpu::ld_16bit, &Cpu::push, 4 };
@@ -251,7 +251,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xD7] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xDA] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xDA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_set, &Cpu::store_to_pc, 3 };
     //opcode_table[0xDB] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xDC] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xDD] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -267,7 +267,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xE6] = { &Cpu::fetch_from_immediate_u8, &Cpu::and_with_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xE7] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xE8] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_sp, &Cpu::store_to_sp, 4 };
-    //opcode_table[0xE9] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xE9] = { &Cpu::fetch_from_hl, &Cpu::jump_absolute, &Cpu::store_to_pc, 1 };
     opcode_table[0xEA] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_direct_8bit, 4 };
     //opcode_table[0xEB] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xEC] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -830,7 +830,7 @@ void Cpu::fetch_from_adjusted_sp() {
 
 // ----------------------------------------------------------------------------
 
-int Cpu::exec_nop() {
+int Cpu::execute_nop() {
     // intentionally do nothing
     return 0;
 }
@@ -1025,6 +1025,78 @@ int Cpu::subtract_from_a_with_carry() {
 
 // ----------------------------------------------------------------------------
 
+int Cpu::jump_absolute() {
+    computed_u16_msb = fetched_u16_msb;
+    computed_u16_lsb = fetched_u16_lsb;
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_absolute_if_z_reset() {
+    int additional_cycle = 0;
+
+    if (!get_flag(Z_FLAG)) {
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_absolute_if_c_reset() {
+    int additional_cycle = 0;
+
+    if (!get_flag(C_FLAG)) {
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_absolute_if_z_set() {
+    int additional_cycle = 0;
+
+    if (get_flag(Z_FLAG)) {
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_absolute_if_c_set() {
+    int additional_cycle = 0;
+
+    if (get_flag(C_FLAG)) {
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
 void Cpu::store_nop() {
     // intentionally do nothing
 }
@@ -1181,6 +1253,12 @@ void Cpu::push() {
     bus->cpu_write(sp, computed_u16_msb);
     sp--;
     bus->cpu_write(sp, computed_u16_lsb);
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::store_to_pc() {
+    pc = join_to_u16(computed_u16_msb, computed_u16_lsb);
 }
 
 // ----------------------------------------------------------------------------
