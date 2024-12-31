@@ -145,6 +145,11 @@ private:
     int test_bit();
     int reset_bit();
     int set_bit();
+    int jump_relative();
+    int jump_relative_if_z_reset();
+    int jump_relative_if_c_reset();
+    int jump_relative_if_z_set();
+    int jump_relative_if_c_set();
 
     // opcode store functions
     void store_nop();

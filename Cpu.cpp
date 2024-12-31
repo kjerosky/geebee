@@ -45,7 +45,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x15] = { &Cpu::fetch_from_d, &Cpu::dec_8bit, &Cpu::store_to_d, 1 };
     opcode_table[0x16] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_d, 2 };
     opcode_table[0x17] = { &Cpu::fetch_from_a, &Cpu::rotate_left_with_carry, &Cpu::store_to_a, 1 };
-    //opcode_table[0x18] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x18] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative, &Cpu::store_to_pc, 3 };
     opcode_table[0x19] = { &Cpu::fetch_from_de, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x1A] = { &Cpu::fetch_indirect_de, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     opcode_table[0x1B] = { &Cpu::fetch_from_de, &Cpu::dec_16bit, &Cpu::store_to_de, 2 };
@@ -54,7 +54,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x1E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_e, 2 };
     opcode_table[0x1F] = { &Cpu::fetch_from_a, &Cpu::rotate_right_with_carry, &Cpu::store_to_a, 1 };
 
-    //opcode_table[0x20] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x20] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_z_reset, &Cpu::store_to_pc, 2 };
     opcode_table[0x21] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
     opcode_table[0x22] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_hl_plus, 2 };
     opcode_table[0x23] = { &Cpu::fetch_from_hl, &Cpu::inc_16bit, &Cpu::store_to_hl, 2 };
@@ -62,7 +62,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x25] = { &Cpu::fetch_from_h, &Cpu::dec_8bit, &Cpu::store_to_h, 1 };
     opcode_table[0x26] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_h, 2 };
     //opcode_table[0x27] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x28] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x28] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_z_set, &Cpu::store_to_pc, 2 };
     opcode_table[0x29] = { &Cpu::fetch_from_hl, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x2A] = { &Cpu::fetch_indirect_hl_plus, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     opcode_table[0x2B] = { &Cpu::fetch_from_hl, &Cpu::dec_16bit, &Cpu::store_to_hl, 2 };
@@ -71,7 +71,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x2E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_l, 2 };
     //opcode_table[0x2F] = { &Cpu::, &Cpu::, &Cpu::,  };
 
-    //opcode_table[0x30] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x30] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_c_reset, &Cpu::store_to_pc, 2 };
     opcode_table[0x31] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_sp, 3 };
     opcode_table[0x32] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_hl_minus, 2 };
     opcode_table[0x33] = { &Cpu::fetch_from_sp, &Cpu::inc_16bit, &Cpu::store_to_sp, 2 };
@@ -79,7 +79,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x35] = { &Cpu::fetch_indirect_hl, &Cpu::dec_8bit, &Cpu::store_indirect_hl, 3 };
     opcode_table[0x36] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 3 };
     //opcode_table[0x37] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0x38] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x38] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_c_set, &Cpu::store_to_pc, 2 };
     opcode_table[0x39] = { &Cpu::fetch_from_sp, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x3A] = { &Cpu::fetch_indirect_hl_minus, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     opcode_table[0x3B] = { &Cpu::fetch_from_sp, &Cpu::dec_16bit, &Cpu::store_to_sp, 2 };
@@ -1032,7 +1032,6 @@ int Cpu::subtract_from_a_with_carry() {
     set_flag(H_FLAG, half_carry);
     set_flag(C_FLAG, carry);
     return 0;
-    //todo
 }
 
 // ----------------------------------------------------------------------------
@@ -1250,6 +1249,78 @@ int Cpu::reset_bit() {
 int Cpu::set_bit() {
     computed_u8 = fetched_u8 | (1 << target_bit);
     return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_relative() {
+    Uint16 offset = static_cast<Sint8>(fetched_u8);
+    split_u16(pc + offset, computed_u16_msb, computed_u16_lsb);
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_relative_if_z_reset() {
+    int additional_cycle = 0;
+
+    if (!get_flag(Z_FLAG)) {
+        Uint16 offset = static_cast<Sint8>(fetched_u8);
+        split_u16(pc + offset, computed_u16_msb, computed_u16_lsb);
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_relative_if_c_reset() {
+    int additional_cycle = 0;
+
+    if (!get_flag(C_FLAG)) {
+        Uint16 offset = static_cast<Sint8>(fetched_u8);
+        split_u16(pc + offset, computed_u16_msb, computed_u16_lsb);
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_relative_if_z_set() {
+    int additional_cycle = 0;
+
+    if (get_flag(Z_FLAG)) {
+        Uint16 offset = static_cast<Sint8>(fetched_u8);
+        split_u16(pc + offset, computed_u16_msb, computed_u16_lsb);
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::jump_relative_if_c_set() {
+    int additional_cycle = 0;
+
+    if (get_flag(C_FLAG)) {
+        Uint16 offset = static_cast<Sint8>(fetched_u8);
+        split_u16(pc + offset, computed_u16_msb, computed_u16_lsb);
+        additional_cycle = 1;
+    } else {
+        split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    }
+
+    return additional_cycle;
 }
 
 // ----------------------------------------------------------------------------
