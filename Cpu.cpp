@@ -69,7 +69,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x2C] = { &Cpu::fetch_from_l, &Cpu::inc_8bit, &Cpu::store_to_l, 1 };
     opcode_table[0x2D] = { &Cpu::fetch_from_l, &Cpu::dec_8bit, &Cpu::store_to_l, 1 };
     opcode_table[0x2E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_l, 2 };
-    //opcode_table[0x2F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x2F] = { &Cpu::fetch_from_a, &Cpu::complement, &Cpu::store_to_a, 1 };
 
     opcode_table[0x30] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_c_reset, &Cpu::store_to_pc, 2 };
     opcode_table[0x31] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_sp, 3 };
@@ -86,7 +86,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x3C] = { &Cpu::fetch_from_a, &Cpu::inc_8bit, &Cpu::store_to_a, 1 };
     opcode_table[0x3D] = { &Cpu::fetch_from_a, &Cpu::dec_8bit, &Cpu::store_to_a, 1 };
     opcode_table[0x3E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
-    //opcode_table[0x3F] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x3F] = { &Cpu::fetch_nop, &Cpu::complement_c_flag, &Cpu::store_nop, 1 };
 
     opcode_table[0x40] = { &Cpu::fetch_from_b, &Cpu::ld_8bit, &Cpu::store_to_b, 1 };
     opcode_table[0x41] = { &Cpu::fetch_from_c, &Cpu::ld_8bit, &Cpu::store_to_b, 1 };
@@ -235,7 +235,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xC8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xC9] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xCA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_z_set, &Cpu::store_to_pc, 3 };
-    //opcode_table[0xCB] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // 0xCB is the prefix opcode, so there's no actual operation here
     //opcode_table[0xCC] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xCD] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xCE] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_a_with_carry, &Cpu::store_to_a, 2 };
@@ -244,7 +244,7 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xD0] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xD1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
     opcode_table[0xD2] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_reset, &Cpu::store_to_pc, 3 };
-    //opcode_table[0xD3] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xD3
     //opcode_table[0xD4] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xD5] = { &Cpu::fetch_from_de, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xD6] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_to_a, 2 };
@@ -252,26 +252,26 @@ void Cpu::initialize_opcode_tables() {
     //opcode_table[0xD8] = { &Cpu::, &Cpu::, &Cpu::,  };
     //opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xDA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_set, &Cpu::store_to_pc, 3 };
-    //opcode_table[0xDB] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xDB
     //opcode_table[0xDC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xDD] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xDD
     opcode_table[0xDE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 2 };
     //opcode_table[0xDF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
     opcode_table[0xE0] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_direct_ff_offset, 3 };
     opcode_table[0xE1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
     opcode_table[0xE2] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_ff_with_c_offset, 2 };
-    //opcode_table[0xE3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xE4] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xE3
+    // no operation defined for 0xE4
     opcode_table[0xE5] = { &Cpu::fetch_from_hl, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xE6] = { &Cpu::fetch_from_immediate_u8, &Cpu::and_with_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xE7] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xE8] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_sp, &Cpu::store_to_sp, 4 };
     opcode_table[0xE9] = { &Cpu::fetch_from_hl, &Cpu::jump_absolute, &Cpu::store_to_pc, 1 };
     opcode_table[0xEA] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_direct_8bit, 4 };
-    //opcode_table[0xEB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xEC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xED] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xEB
+    // no operation defined for 0xEC
+    // no operation defined for 0xED
     opcode_table[0xEE] = { &Cpu::fetch_from_immediate_u8, &Cpu::xor_with_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xEF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
@@ -279,7 +279,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xF1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_af, 3 };
     opcode_table[0xF2] = { &Cpu::fetch_indirect_ff_with_c_offset, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
     //opcode_table[0xF3] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xF4] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xF4
     opcode_table[0xF5] = { &Cpu::fetch_from_af, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xF6] = { &Cpu::fetch_from_immediate_u8, &Cpu::or_with_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xF7] = { &Cpu::, &Cpu::, &Cpu::,  };
@@ -287,8 +287,8 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xF9] = { &Cpu::fetch_from_hl, &Cpu::ld_16bit, &Cpu::store_to_sp, 2 };
     opcode_table[0xFA] = { &Cpu::fetch_direct, &Cpu::ld_8bit, &Cpu::store_to_a, 4 };
     //opcode_table[0xFB] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xFC] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xFD] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // no operation defined for 0xFC
+    // no operation defined for 0xFD
     opcode_table[0xFE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_nop, 2 };
     //opcode_table[0xFF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
@@ -1321,6 +1321,27 @@ int Cpu::jump_relative_if_c_set() {
     }
 
     return additional_cycle;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::complement() {
+    computed_u8 = ~fetched_u8;
+
+    set_flag(N_FLAG, true);
+    set_flag(H_FLAG, true);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::complement_c_flag() {
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, !get_flag(C_FLAG));
+
+    return 0;
 }
 
 // ----------------------------------------------------------------------------

@@ -150,6 +150,8 @@ private:
     int jump_relative_if_c_reset();
     int jump_relative_if_z_set();
     int jump_relative_if_c_set();
+    int complement();
+    int complement_c_flag();
 
     // opcode store functions
     void store_nop();
