@@ -49,6 +49,7 @@ private:
     bool get_flag(FLAGS flag);
     void set_flag(FLAGS flag, bool value);
     void set_target_bit(Uint8 prefixed_opcode_byte);
+    void set_target_rst_address(Uint8 opcode_byte);
 
     Bus* bus;
 
@@ -77,6 +78,7 @@ private:
     Uint8 fetched_u8;
     Uint8 computed_u8;
     int target_bit;
+    Uint16 target_rst_address;
 
     Uint8 fetched_u16_lsb;
     Uint8 fetched_u16_msb;
@@ -162,6 +164,8 @@ private:
     int ret_if_c_reset();
     int ret_if_z_set();
     int ret_if_c_set();
+    int set_c_flag();
+    int rst();
 
     // opcode store functions
     void store_nop();

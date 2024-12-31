@@ -78,7 +78,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x34] = { &Cpu::fetch_indirect_hl, &Cpu::inc_8bit, &Cpu::store_indirect_hl, 3 };
     opcode_table[0x35] = { &Cpu::fetch_indirect_hl, &Cpu::dec_8bit, &Cpu::store_indirect_hl, 3 };
     opcode_table[0x36] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 3 };
-    //opcode_table[0x37] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x37] = { &Cpu::fetch_nop, &Cpu::set_c_flag, &Cpu::store_nop, 1 };
     opcode_table[0x38] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_c_set, &Cpu::store_to_pc, 2 };
     opcode_table[0x39] = { &Cpu::fetch_from_sp, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x3A] = { &Cpu::fetch_indirect_hl_minus, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
@@ -231,7 +231,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xC4] = { &Cpu::fetch_from_immediate_u16, &Cpu::call_if_z_reset, &Cpu::store_to_pc, 3 };
     opcode_table[0xC5] = { &Cpu::fetch_from_bc, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xC6] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_a, &Cpu::store_to_a, 2 };
-    //opcode_table[0xC7] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xC7] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
     opcode_table[0xC8] = { &Cpu::fetch_nop, &Cpu::ret_if_z_set, &Cpu::store_to_pc, 2 };
     opcode_table[0xC9] = { &Cpu::pop, &Cpu::ret, &Cpu::store_to_pc, 4 };
     opcode_table[0xCA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_z_set, &Cpu::store_to_pc, 3 };
@@ -239,7 +239,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xCC] = { &Cpu::fetch_from_immediate_u16, &Cpu::call_if_z_set, &Cpu::store_to_pc, 3 };
     opcode_table[0xCD] = { &Cpu::fetch_from_immediate_u16, &Cpu::call, &Cpu::store_to_pc, 6 };
     opcode_table[0xCE] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_a_with_carry, &Cpu::store_to_a, 2 };
-    //opcode_table[0xCF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xCF] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
 
     opcode_table[0xD0] = { &Cpu::fetch_nop, &Cpu::ret_if_c_reset, &Cpu::store_to_pc, 2 };
     opcode_table[0xD1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
@@ -248,7 +248,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xD4] = { &Cpu::fetch_from_immediate_u16, &Cpu::call_if_c_reset, &Cpu::store_to_pc, 3 };
     opcode_table[0xD5] = { &Cpu::fetch_from_de, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xD6] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_to_a, 2 };
-    //opcode_table[0xD7] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xD7] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
     opcode_table[0xD8] = { &Cpu::fetch_nop, &Cpu::ret_if_c_set, &Cpu::store_to_pc, 2 };
     //opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xDA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_set, &Cpu::store_to_pc, 3 };
@@ -256,7 +256,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xDC] = { &Cpu::fetch_from_immediate_u16, &Cpu::call_if_c_set, &Cpu::store_to_pc, 3 };
     // no operation defined for 0xDD
     opcode_table[0xDE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a_with_carry, &Cpu::store_to_a, 2 };
-    //opcode_table[0xDF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xDF] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
 
     opcode_table[0xE0] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_direct_ff_offset, 3 };
     opcode_table[0xE1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
@@ -265,7 +265,7 @@ void Cpu::initialize_opcode_tables() {
     // no operation defined for 0xE4
     opcode_table[0xE5] = { &Cpu::fetch_from_hl, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xE6] = { &Cpu::fetch_from_immediate_u8, &Cpu::and_with_a, &Cpu::store_to_a, 2 };
-    //opcode_table[0xE7] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xE7] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
     opcode_table[0xE8] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_sp, &Cpu::store_to_sp, 4 };
     opcode_table[0xE9] = { &Cpu::fetch_from_hl, &Cpu::jump_absolute, &Cpu::store_to_pc, 1 };
     opcode_table[0xEA] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_direct_8bit, 4 };
@@ -273,7 +273,7 @@ void Cpu::initialize_opcode_tables() {
     // no operation defined for 0xEC
     // no operation defined for 0xED
     opcode_table[0xEE] = { &Cpu::fetch_from_immediate_u8, &Cpu::xor_with_a, &Cpu::store_to_a, 2 };
-    //opcode_table[0xEF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xEF] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
 
     opcode_table[0xF0] = { &Cpu::fetch_direct_ff_offset, &Cpu::ld_8bit, &Cpu::store_to_a, 3 };
     opcode_table[0xF1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_af, 3 };
@@ -282,7 +282,7 @@ void Cpu::initialize_opcode_tables() {
     // no operation defined for 0xF4
     opcode_table[0xF5] = { &Cpu::fetch_from_af, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xF6] = { &Cpu::fetch_from_immediate_u8, &Cpu::or_with_a, &Cpu::store_to_a, 2 };
-    //opcode_table[0xF7] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xF7] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
     opcode_table[0xF8] = { &Cpu::fetch_from_adjusted_sp, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
     opcode_table[0xF9] = { &Cpu::fetch_from_hl, &Cpu::ld_16bit, &Cpu::store_to_sp, 2 };
     opcode_table[0xFA] = { &Cpu::fetch_direct, &Cpu::ld_8bit, &Cpu::store_to_a, 4 };
@@ -290,7 +290,7 @@ void Cpu::initialize_opcode_tables() {
     // no operation defined for 0xFC
     // no operation defined for 0xFD
     opcode_table[0xFE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_nop, 2 };
-    //opcode_table[0xFF] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xFF] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
 
     prefixed_opcode_table[0x00] = { &Cpu::fetch_from_b, &Cpu::rotate_left, &Cpu::store_to_b, 2 };
     prefixed_opcode_table[0x01] = { &Cpu::fetch_from_c, &Cpu::rotate_left, &Cpu::store_to_c, 2 };
@@ -592,6 +592,15 @@ void Cpu::set_target_bit(Uint8 prefixed_opcode_byte) {
 
 // ----------------------------------------------------------------------------
 
+void Cpu::set_target_rst_address(Uint8 opcode_byte) {
+    target_rst_address = static_cast<Uint16>(opcode_byte) & 0x0030;
+    if (opcode_byte & 0x08) {
+        target_rst_address |= 0x0008;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 void Cpu::clock() {
     if (current_instruction_cycles_remaining <= 0) {
         Uint8 opcode_byte = bus->cpu_read(pc++);
@@ -605,6 +614,8 @@ void Cpu::clock() {
             set_target_bit(opcode_byte);
         } else {
             opcode = opcode_table[opcode_byte];
+
+            set_target_rst_address(opcode_byte);
         }
 
         current_instruction_cycles_remaining = opcode.base_cycles;
@@ -1515,6 +1526,27 @@ int Cpu::ret_if_c_set() {
     }
 
     return additional_cycles;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::set_c_flag() {
+    set_flag(N_FLAG, false);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, true);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::rst() {
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    push();
+
+    split_u16(target_rst_address, computed_u16_msb, computed_u16_lsb);
+
+    return 0;
 }
 
 // ----------------------------------------------------------------------------
