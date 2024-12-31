@@ -172,6 +172,7 @@ private:
     int disable_ime();
     int enable_ime();
     int reti();
+    int daa();
 
     // opcode store functions
     void store_nop();

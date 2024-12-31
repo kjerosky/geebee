@@ -61,7 +61,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x24] = { &Cpu::fetch_from_h, &Cpu::inc_8bit, &Cpu::store_to_h, 1 };
     opcode_table[0x25] = { &Cpu::fetch_from_h, &Cpu::dec_8bit, &Cpu::store_to_h, 1 };
     opcode_table[0x26] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_h, 2 };
-    //opcode_table[0x27] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x27] = { &Cpu::fetch_from_a, &Cpu::daa, &Cpu::store_to_a, 1 };
     opcode_table[0x28] = { &Cpu::fetch_from_immediate_u8, &Cpu::jump_relative_if_z_set, &Cpu::store_to_pc, 2 };
     opcode_table[0x29] = { &Cpu::fetch_from_hl, &Cpu::add_to_hl, &Cpu::store_to_hl, 2 };
     opcode_table[0x2A] = { &Cpu::fetch_indirect_hl_plus, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
@@ -1585,6 +1585,44 @@ int Cpu::reti() {
     computed_u16_lsb = fetched_u16_lsb;
 
     ime = true;
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::daa() {
+    // I got SO MUCH help from this link:
+    // https://blog.ollien.com/posts/gb-daa/
+
+    bool subtraction_was_performed = get_flag(N_FLAG);
+    bool half_carry_was_performed = get_flag(H_FLAG);
+    bool carry_was_performed = get_flag(C_FLAG);
+
+    Uint8 a_value = fetched_u8;
+    Uint8 offset = 0x00;
+    bool carry_occurred = false;
+
+    if ((!subtraction_was_performed && (a_value & 0x0F) > 0x09) || half_carry_was_performed) {
+        offset |= 0x06;
+    }
+
+    if ((!subtraction_was_performed && a_value > 0x99) || carry_was_performed) {
+        offset |= 0x60;
+        carry_occurred = true;
+    }
+
+    bool temp_half_carry_out;
+    bool temp_carry_out;
+    if (!subtraction_was_performed) {
+        computed_u8 = full_add_8bit(a, offset, 0, temp_half_carry_out, temp_carry_out);
+    } else {
+        computed_u8 = full_sub_8bit(a, offset, 0, temp_half_carry_out, temp_carry_out);
+    }
+
+    set_flag(Z_FLAG, computed_u8 == 0);
+    set_flag(H_FLAG, false);
+    set_flag(C_FLAG, carry_occurred);
 
     return 0;
 }
