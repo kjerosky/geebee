@@ -224,7 +224,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xBE] = { &Cpu::fetch_indirect_hl, &Cpu::subtract_from_a, &Cpu::store_nop, 2 };
     opcode_table[0xBF] = { &Cpu::fetch_from_a, &Cpu::subtract_from_a, &Cpu::store_nop, 1 };
 
-    //opcode_table[0xC0] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xC0] = { &Cpu::fetch_nop, &Cpu::ret_if_z_reset, &Cpu::store_to_pc, 2 };
     opcode_table[0xC1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_bc, 3 };
     opcode_table[0xC2] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_z_reset, &Cpu::store_to_pc, 3 };
     opcode_table[0xC3] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute, &Cpu::store_to_pc, 4 };
@@ -232,8 +232,8 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xC5] = { &Cpu::fetch_from_bc, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xC6] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xC7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xC8] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xC9] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xC8] = { &Cpu::fetch_nop, &Cpu::ret_if_z_set, &Cpu::store_to_pc, 2 };
+    opcode_table[0xC9] = { &Cpu::pop, &Cpu::ret, &Cpu::store_to_pc, 4 };
     opcode_table[0xCA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_z_set, &Cpu::store_to_pc, 3 };
     // 0xCB is the prefix opcode, so there's no actual operation here
     opcode_table[0xCC] = { &Cpu::fetch_from_immediate_u16, &Cpu::call_if_z_set, &Cpu::store_to_pc, 3 };
@@ -241,7 +241,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xCE] = { &Cpu::fetch_from_immediate_u8, &Cpu::add_to_a_with_carry, &Cpu::store_to_a, 2 };
     //opcode_table[0xCF] = { &Cpu::, &Cpu::, &Cpu::,  };
 
-    //opcode_table[0xD0] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xD0] = { &Cpu::fetch_nop, &Cpu::ret_if_c_reset, &Cpu::store_to_pc, 2 };
     opcode_table[0xD1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
     opcode_table[0xD2] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_reset, &Cpu::store_to_pc, 3 };
     // no operation defined for 0xD3
@@ -249,7 +249,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xD5] = { &Cpu::fetch_from_de, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xD6] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_to_a, 2 };
     //opcode_table[0xD7] = { &Cpu::, &Cpu::, &Cpu::,  };
-    //opcode_table[0xD8] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xD8] = { &Cpu::fetch_nop, &Cpu::ret_if_c_set, &Cpu::store_to_pc, 2 };
     //opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
     opcode_table[0xDA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_set, &Cpu::store_to_pc, 3 };
     // no operation defined for 0xDB
@@ -1422,6 +1422,91 @@ int Cpu::call_if_c_set() {
 
     if (get_flag(C_FLAG)) {
         push();
+
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+
+        additional_cycles = 3;
+    }
+
+    return additional_cycles;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::ret() {
+    computed_u16_msb = fetched_u16_msb;
+    computed_u16_lsb = fetched_u16_lsb;
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::ret_if_z_reset() {
+    int additional_cycles = 0;
+
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+
+    if (!get_flag(Z_FLAG)) {
+        pop();
+
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+
+        additional_cycles = 3;
+    }
+
+    return additional_cycles;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::ret_if_c_reset() {
+    int additional_cycles = 0;
+
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+
+    if (!get_flag(C_FLAG)) {
+        pop();
+
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+
+        additional_cycles = 3;
+    }
+
+    return additional_cycles;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::ret_if_z_set() {
+    int additional_cycles = 0;
+
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+
+    if (get_flag(Z_FLAG)) {
+        pop();
+
+        computed_u16_msb = fetched_u16_msb;
+        computed_u16_lsb = fetched_u16_lsb;
+
+        additional_cycles = 3;
+    }
+
+    return additional_cycles;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::ret_if_c_set() {
+    int additional_cycles = 0;
+
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+
+    if (get_flag(C_FLAG)) {
+        pop();
 
         computed_u16_msb = fetched_u16_msb;
         computed_u16_lsb = fetched_u16_lsb;

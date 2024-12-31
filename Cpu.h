@@ -157,6 +157,11 @@ private:
     int call_if_c_reset();
     int call_if_z_set();
     int call_if_c_set();
+    int ret();
+    int ret_if_z_reset();
+    int ret_if_c_reset();
+    int ret_if_z_set();
+    int ret_if_c_set();
 
     // opcode store functions
     void store_nop();
