@@ -250,7 +250,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xD6] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_to_a, 2 };
     opcode_table[0xD7] = { &Cpu::fetch_nop, &Cpu::rst, &Cpu::store_to_pc, 4 };
     opcode_table[0xD8] = { &Cpu::fetch_nop, &Cpu::ret_if_c_set, &Cpu::store_to_pc, 2 };
-    //opcode_table[0xD9] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xD9] = { &Cpu::pop, &Cpu::reti, &Cpu::store_to_pc, 4 };
     opcode_table[0xDA] = { &Cpu::fetch_from_immediate_u16, &Cpu::jump_absolute_if_c_set, &Cpu::store_to_pc, 3 };
     // no operation defined for 0xDB
     opcode_table[0xDC] = { &Cpu::fetch_from_immediate_u16, &Cpu::call_if_c_set, &Cpu::store_to_pc, 3 };
@@ -278,7 +278,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xF0] = { &Cpu::fetch_direct_ff_offset, &Cpu::ld_8bit, &Cpu::store_to_a, 3 };
     opcode_table[0xF1] = { &Cpu::pop, &Cpu::ld_16bit, &Cpu::store_to_af, 3 };
     opcode_table[0xF2] = { &Cpu::fetch_indirect_ff_with_c_offset, &Cpu::ld_8bit, &Cpu::store_to_a, 2 };
-    //opcode_table[0xF3] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xF3] = { &Cpu::fetch_nop, &Cpu::disable_ime, &Cpu::store_nop, 1 };
     // no operation defined for 0xF4
     opcode_table[0xF5] = { &Cpu::fetch_from_af, &Cpu::ld_16bit, &Cpu::push, 4 };
     opcode_table[0xF6] = { &Cpu::fetch_from_immediate_u8, &Cpu::or_with_a, &Cpu::store_to_a, 2 };
@@ -286,7 +286,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0xF8] = { &Cpu::fetch_from_adjusted_sp, &Cpu::ld_16bit, &Cpu::store_to_hl, 3 };
     opcode_table[0xF9] = { &Cpu::fetch_from_hl, &Cpu::ld_16bit, &Cpu::store_to_sp, 2 };
     opcode_table[0xFA] = { &Cpu::fetch_direct, &Cpu::ld_8bit, &Cpu::store_to_a, 4 };
-    //opcode_table[0xFB] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0xFB] = { &Cpu::fetch_nop, &Cpu::enable_ime, &Cpu::store_nop, 1 };
     // no operation defined for 0xFC
     // no operation defined for 0xFD
     opcode_table[0xFE] = { &Cpu::fetch_from_immediate_u8, &Cpu::subtract_from_a, &Cpu::store_nop, 2 };
@@ -603,6 +603,13 @@ void Cpu::set_target_rst_address(Uint8 opcode_byte) {
 
 void Cpu::clock() {
     if (current_instruction_cycles_remaining <= 0) {
+        if (instructions_remaining_to_enable_ime > 0) {
+            instructions_remaining_to_enable_ime--;
+            if (instructions_remaining_to_enable_ime == 0) {
+                ime = true;
+            }
+        }
+
         Uint8 opcode_byte = bus->cpu_read(pc++);
 
         Instruction opcode;
@@ -647,6 +654,8 @@ void Cpu::reset() {
     flags = 0x00;
     pc = 0x0100;
     sp = 0xFFFE;
+    ime = false;
+    instructions_remaining_to_enable_ime = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1545,6 +1554,37 @@ int Cpu::rst() {
     push();
 
     split_u16(target_rst_address, computed_u16_msb, computed_u16_lsb);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::disable_ime() {
+    ime = false;
+    instructions_remaining_to_enable_ime = 0;
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::enable_ime() {
+    // The current instruction hasn't been counted yet, so set this to 2
+    // instead of 1, for the one instruction delay for ime to actually be
+    // enabled.
+    instructions_remaining_to_enable_ime = 2;
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::reti() {
+    computed_u16_msb = fetched_u16_msb;
+    computed_u16_lsb = fetched_u16_lsb;
+
+    ime = true;
 
     return 0;
 }

@@ -72,6 +72,7 @@ private:
     Uint8 flags;
     Uint16 pc;
     Uint16 sp;
+    bool ime;
 
     int current_instruction_cycles_remaining;
 
@@ -86,6 +87,8 @@ private:
     Uint8 computed_u16_msb;
 
     bool is_current_opcode_prefixed;
+
+    int instructions_remaining_to_enable_ime;
 
     // opcode fetch functions
     void fetch_nop();
@@ -166,6 +169,9 @@ private:
     int ret_if_c_set();
     int set_c_flag();
     int rst();
+    int disable_ime();
+    int enable_ime();
+    int reti();
 
     // opcode store functions
     void store_nop();
