@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+class Mapper;
+
 class Cartridge {
 
 public:
@@ -18,6 +20,8 @@ public:
 private:
 
     std::vector<Uint8> contents;
+
+    Mapper* mapper;
 };
 
 #endif
