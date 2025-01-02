@@ -1,9 +1,10 @@
 #include "GameBoy.h"
 #include "Bus.h"
 #include "Cpu.h"
+#include "Cartridge.h"
 
-GameBoy::GameBoy() {
-    bus = new Bus();
+GameBoy::GameBoy(Cartridge* cartridge) {
+    bus = new Bus(cartridge);
     cpu = new Cpu(bus);
 }
 
@@ -30,12 +31,6 @@ Cpu_Info GameBoy::get_cpu_info() {
 
 // ----------------------------------------------------------------------------
 
-Uint8* GameBoy::get_ram_contents() {
-    return bus->get_ram_contents();
-}
-
-// ----------------------------------------------------------------------------
-
 void GameBoy::override_cpu_state(Cpu_Info& new_cpu_state) {
     cpu->override_cpu_state(new_cpu_state);
 }
@@ -48,4 +43,16 @@ void GameBoy::generate_interrupt(int interrupt_bit) {
     }
 
     bus->cpu_write(0xFF0F, bus->cpu_read(0xFF0F) | (0x01 << interrupt_bit));
+}
+
+// ----------------------------------------------------------------------------
+
+Uint8 GameBoy::read_from_bus(Uint16 address) {
+    return bus->cpu_read(address);
+}
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::write_to_bus(Uint16 address, Uint8 value) {
+    bus->cpu_write(address, value);
 }

@@ -4,8 +4,10 @@
 #include <cstdlib>
 #include <string>
 #include <sstream>
+#include <cstdlib>
 
 #include "GameBoy.h"
+#include "Cartridge.h"
 
 std::string hex(unsigned int number, int width) {
     std::string s(width, '0');
@@ -44,7 +46,7 @@ void draw_string(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row
 
 // ----------------------------------------------------------------------------
 
-void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Uint16 ram_page, Uint8* ram_contents, Uint16 current_pc) {
+void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Uint16 ram_page, Uint8* ram_page_contents, Uint16 current_pc) {
     draw_string(renderer, font_texture, text_row++, text_column, 2, "      |  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
     draw_string(renderer, font_texture, text_row++, text_column, 2, "------+------------------------------------------------");
 
@@ -53,12 +55,12 @@ void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_r
         std::string highlighted_ram_row_contents = "       ";
 
         for (Uint16 column = 0x0000; column <= 0x000F; column++) {
-            ram_row_contents += " " + hex(ram_contents[ram_page + row + column], 2);
+            ram_row_contents += " " + hex(ram_page_contents[row + column], 2);
 
             if ((current_pc & 0xFFF0) == (ram_page | row)) {
                 highlighted_ram_row_contents += " ";
                 if ((current_pc & 0x000F) == column) {
-                    highlighted_ram_row_contents += hex(ram_contents[ram_page + row + column], 2);
+                    highlighted_ram_row_contents += hex(ram_page_contents[row + column], 2);
                 } else {
                     highlighted_ram_row_contents += "  ";
                 }
@@ -100,12 +102,12 @@ void draw_cpu_info(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_r
 
 // ----------------------------------------------------------------------------
 
-void fill_ram_at_location(Uint8* ram, Uint16 location, std::stringstream& ss) {
+void fill_ram_at_location(GameBoy& game_boy, Uint16 location, std::stringstream& ss) {
     while (!ss.eof())
     {
         std::string b;
         ss >> b;
-        ram[location++] = (Uint8)std::stoul(b, nullptr, 16);
+        game_boy.write_to_bus(location++, (Uint8)std::stoul(b, nullptr, 16));
     }
 
     ss.str("");
@@ -114,34 +116,49 @@ void fill_ram_at_location(Uint8* ram, Uint16 location, std::stringstream& ss) {
 
 // ----------------------------------------------------------------------------
 
-void setup_ram_for_testing(Uint8* ram, Uint16 initial_pc) {
+void setup_ram_for_testing(GameBoy& game_boy, Uint16 initial_pc) {
     std::stringstream ss;
 
     ss << "3E 00   D9";
-    fill_ram_at_location(ram, 0x0040, ss);
+    fill_ram_at_location(game_boy, 0x0040, ss);
 
     ss << "3E 02   D9";
-    fill_ram_at_location(ram, 0x0048, ss);
+    fill_ram_at_location(game_boy, 0x0048, ss);
 
     ss << "3E 04   D9";
-    fill_ram_at_location(ram, 0x0050, ss);
+    fill_ram_at_location(game_boy, 0x0050, ss);
 
     ss << "3E 06   D9";
-    fill_ram_at_location(ram, 0x0058, ss);
+    fill_ram_at_location(game_boy, 0x0058, ss);
 
     ss << "3E 08   D9";
-    fill_ram_at_location(ram, 0x0060, ss);
+    fill_ram_at_location(game_boy, 0x0060, ss);
 
     ss << "00   C3 50 01";
-    fill_ram_at_location(ram, initial_pc, ss);
+    fill_ram_at_location(game_boy, initial_pc, ss);
 
     ss << "FB   21 FF FF   06 05   70   3E 78   76   3C   18 FE";
-    fill_ram_at_location(ram, 0x0150, ss);
+    fill_ram_at_location(game_boy, 0x0150, ss);
+}
+
+// ----------------------------------------------------------------------------
+
+void refresh_ram_page_contents(GameBoy& game_boy, Uint8* ram_page_contents, Uint16 ram_page) {
+    for (Uint16 i = 0; i < 256; i++) {
+        ram_page_contents[i] = game_boy.read_from_bus(ram_page + i);
+    }
 }
 
 // ----------------------------------------------------------------------------
 
 int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cerr << "Usage: " << argv[0] << " rom_file" << std::endl;
+        exit(1);
+    }
+
+    std::string rom_filename = argv[1];
+
     const int GAMEBOY_SCREEN_WIDTH = 160;
     const int GAMEBOY_SCREEN_HEIGHT = 144;
 
@@ -171,12 +188,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    GameBoy game_boy;
-    Uint8* ram_contents = game_boy.get_ram_contents();
+    Cartridge cartridge(rom_filename);
+    GameBoy game_boy(&cartridge);
+    Uint8 ram_page_contents[256];
     Uint16 initial_pc = game_boy.get_cpu_info().pc;
     Uint16 ram_page = initial_pc & 0xFF00;
 
-    setup_ram_for_testing(ram_contents, initial_pc);
+    // setup_ram_for_testing(game_boy, initial_pc);
 
     bool is_running = true;
     while (is_running) {
@@ -209,11 +227,12 @@ int main(int argc, char* argv[]) {
         }
 
         Cpu_Info current_cpu_info = game_boy.get_cpu_info();
+        refresh_ram_page_contents(game_boy, ram_page_contents, ram_page);
 
         SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
         SDL_RenderClear(renderer);
 
-        draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_contents, current_cpu_info.pc);
+        draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_page_contents, current_cpu_info.pc);
         draw_cpu_info(renderer, font_texture, 22, 1, 2, current_cpu_info);
 
         SDL_RenderPresent(renderer);

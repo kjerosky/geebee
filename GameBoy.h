@@ -5,20 +5,22 @@
 
 class Cpu;
 class Bus;
+class Cartridge;
 
 class GameBoy {
 
 public:
 
-    GameBoy();
+    GameBoy(Cartridge* cartridge);
     ~GameBoy();
 
     void execute_next_instruction();
     Cpu_Info get_cpu_info();
-    Uint8* get_ram_contents();
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
     void generate_interrupt(int interrupt_bit);
+    Uint8 read_from_bus(Uint16 address);
+    void write_to_bus(Uint16 address, Uint8 value);
 
 private:
 
