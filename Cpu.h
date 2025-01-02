@@ -20,6 +20,9 @@ struct Cpu_Info {
     bool n_flag;
     bool h_flag;
     bool c_flag;
+
+    // not for overriding, just display
+    bool ime;
 };
 
 class Cpu {
@@ -50,6 +53,8 @@ private:
     void set_flag(FLAGS flag, bool value);
     void set_target_bit(Uint8 prefixed_opcode_byte);
     void set_target_rst_address(Uint8 opcode_byte);
+    bool is_interrupt_pending();
+    bool handle_pending_interrupts();
 
     Bus* bus;
 
@@ -75,6 +80,8 @@ private:
     bool ime;
 
     int current_instruction_cycles_remaining;
+    int instructions_remaining_to_enable_ime;
+    bool is_halted;
 
     Uint8 fetched_u8;
     Uint8 computed_u8;
@@ -87,8 +94,6 @@ private:
     Uint8 computed_u16_msb;
 
     bool is_current_opcode_prefixed;
-
-    int instructions_remaining_to_enable_ime;
 
     // opcode fetch functions
     void fetch_nop();
@@ -173,6 +178,7 @@ private:
     int enable_ime();
     int reti();
     int daa();
+    int halt();
 
     // opcode store functions
     void store_nop();

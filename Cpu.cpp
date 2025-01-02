@@ -37,7 +37,9 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x0E] = { &Cpu::fetch_from_immediate_u8, &Cpu::ld_8bit, &Cpu::store_to_c, 2 };
     opcode_table[0x0F] = { &Cpu::fetch_from_a, &Cpu::rotate_right, &Cpu::store_to_a, 1 };
 
-    //opcode_table[0x10] = { &Cpu::, &Cpu::, &Cpu::,  };
+    // 0x10 is the opcode for the STOP operation, which does not need to be
+    // implemented at this time. The Pan Docs note that no licensed rom makes
+    // use of the STOP operation, outside of Color GameBoy speed switching.
     opcode_table[0x11] = { &Cpu::fetch_from_immediate_u16, &Cpu::ld_16bit, &Cpu::store_to_de, 3 };
     opcode_table[0x12] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_de, 2 };
     opcode_table[0x13] = { &Cpu::fetch_from_de, &Cpu::inc_16bit, &Cpu::store_to_de, 2 };
@@ -145,7 +147,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x73] = { &Cpu::fetch_from_e, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
     opcode_table[0x74] = { &Cpu::fetch_from_h, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
     opcode_table[0x75] = { &Cpu::fetch_from_l, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
-    //opcode_table[0x76] = { &Cpu::, &Cpu::, &Cpu::,  };
+    opcode_table[0x76] = { &Cpu::fetch_nop, &Cpu::halt, &Cpu::push, 1 };
     opcode_table[0x77] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
     opcode_table[0x78] = { &Cpu::fetch_from_b, &Cpu::ld_8bit, &Cpu::store_to_a, 1 };
     opcode_table[0x79] = { &Cpu::fetch_from_c, &Cpu::ld_8bit, &Cpu::store_to_a, 1 };
@@ -601,13 +603,76 @@ void Cpu::set_target_rst_address(Uint8 opcode_byte) {
 
 // ----------------------------------------------------------------------------
 
+bool Cpu::is_interrupt_pending() {
+    Uint8 enabled_interrupts = bus->cpu_read(0xFFFF);
+    Uint8 requested_interrupts = bus->cpu_read(0xFF0F);
+    return (enabled_interrupts & requested_interrupts) != 0;
+}
+
+// ----------------------------------------------------------------------------
+
+bool Cpu::handle_pending_interrupts() {
+    if (!ime) {
+        return false;
+    }
+
+    Uint8 enabled_interrupts = bus->cpu_read(0xFFFF);
+    Uint8 requested_interrupts = bus->cpu_read(0xFF0F);
+    Uint8 interrupts_to_service = (enabled_interrupts & requested_interrupts) & 0x1F;
+
+    if (interrupts_to_service == 0) {
+        return false;
+    }
+
+    ime = false;
+
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+    push();
+
+    if ((interrupts_to_service & 0x01) != 0) {
+        pc = 0x0040;
+        requested_interrupts &= ~0x01;
+    } else if ((interrupts_to_service & 0x02) != 0) {
+        pc = 0x0048;
+        requested_interrupts &= ~0x02;
+    } else if ((interrupts_to_service & 0x04) != 0) {
+        pc = 0x0050;
+        requested_interrupts &= ~0x04;
+    } else if ((interrupts_to_service & 0x08) != 0) {
+        pc = 0x0058;
+        requested_interrupts &= ~0x08;
+    } else {
+        pc = 0x0060;
+        requested_interrupts &= ~0x10;
+    }
+
+    bus->cpu_write(0xFF0F, requested_interrupts);
+
+    current_instruction_cycles_remaining = 5;
+
+    return true;
+}
+
+// ----------------------------------------------------------------------------
+
 void Cpu::clock() {
     if (current_instruction_cycles_remaining <= 0) {
-        if (instructions_remaining_to_enable_ime > 0) {
-            instructions_remaining_to_enable_ime--;
-            if (instructions_remaining_to_enable_ime == 0) {
-                ime = true;
+        if (is_halted) {
+            if (is_interrupt_pending()) {
+                is_halted = false;
+                if (!ime) {
+                    return;
+                }
+            } else {
+                return;
             }
+        }
+
+        if (handle_pending_interrupts()) {
+            // Avoid an off-by-one error in the cycles remaining count since
+            // we're leaving this method before decrementing that count.
+            current_instruction_cycles_remaining--;
+            return;
         }
 
         Uint8 opcode_byte = bus->cpu_read(pc++);
@@ -630,6 +695,13 @@ void Cpu::clock() {
         (this->*opcode.fetch)();
         current_instruction_cycles_remaining += (this->*opcode.execute)();
         (this->*opcode.store)();
+
+        if (instructions_remaining_to_enable_ime > 0) {
+            instructions_remaining_to_enable_ime--;
+            if (instructions_remaining_to_enable_ime == 0) {
+                ime = true;
+            }
+        }
     }
 
     current_instruction_cycles_remaining--;
@@ -655,7 +727,9 @@ void Cpu::reset() {
     pc = 0x0100;
     sp = 0xFFFE;
     ime = false;
+
     instructions_remaining_to_enable_ime = 0;
+    is_halted = false;
 }
 
 // ----------------------------------------------------------------------------
@@ -675,6 +749,7 @@ Cpu_Info Cpu::get_cpu_info() {
         get_flag(N_FLAG),
         get_flag(H_FLAG),
         get_flag(C_FLAG),
+        ime,
     };
 }
 
@@ -1623,6 +1698,16 @@ int Cpu::daa() {
     set_flag(Z_FLAG, computed_u8 == 0);
     set_flag(H_FLAG, false);
     set_flag(C_FLAG, carry_occurred);
+
+    return 0;
+}
+
+// ----------------------------------------------------------------------------
+
+int Cpu::halt() {
+    split_u16(pc, computed_u16_msb, computed_u16_lsb);
+
+    is_halted = true;
 
     return 0;
 }

@@ -18,6 +18,7 @@ public:
     Uint8* get_ram_contents();
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
+    void generate_interrupt(int interrupt_bit);
 
 private:
 
