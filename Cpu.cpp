@@ -1,5 +1,7 @@
 #include "Cpu.h"
+
 #include "Bus.h"
+#include "bit_utils.h"
 
 Cpu::Cpu(Bus* bus)
         : bus(bus),
@@ -1934,19 +1936,6 @@ Uint16 Cpu::get_fetched_u16() {
 
 // ----------------------------------------------------------------------------
 
-void Cpu::split_u16(Uint16 u16, Uint8& msb, Uint8& lsb) {
-    msb = static_cast<Uint8>((u16 >> 8) & 0x00FF);
-    lsb = static_cast<Uint8>(u16 & 0x00FF);
-}
-
-// ----------------------------------------------------------------------------
-
-Uint16 Cpu::join_to_u16(Uint8 msb, Uint8 lsb) {
-    return (static_cast<Uint16>(msb) << 8) | static_cast<Uint16>(lsb);
-}
-
-// ----------------------------------------------------------------------------
-
 void Cpu::override_cpu_state(Cpu_Info& new_cpu_state) {
     pc = new_cpu_state.pc;
     sp = new_cpu_state.sp;
@@ -1970,5 +1959,515 @@ void Cpu::override_cpu_state(Cpu_Info& new_cpu_state) {
     }
     if (new_cpu_state.c_flag) {
         flags |= C_FLAG;
+    }
+}
+
+// ----------------------------------------------------------------------------
+
+void Cpu::disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output) {
+    output.clear();
+
+    Uint16 current_address = start_address;
+    for (int i = 0; i < num_of_instructions; i++) {
+        std::string instruction_address = "$" + hex(current_address, 4) + ": ";
+        std::string current_disassembled_instruction = "< UNKNOWN >";
+
+        Uint8 opcode = bus->cpu_read(current_address++);
+        if (opcode == 0xCB) {
+            std::string op_half1[] = { "RLC ", "RL ", "SLA ", "SWAP ", "BIT 0, ", "BIT 2, ", "BIT 4, ", "BIT 6, ", "RES 0, ", "RES 2, ", "RES 4, ", "RES 6, ", "SET 0, ", "SET 2, ", "SET 4, ", "SET 6, " };
+            std::string op_half2[] = { "RRC ", "RR ", "SRA ", "SRL ", "BIT 1, ", "BIT 3, ", "BIT 5, ", "BIT 7, ", "RES 1, ", "RES 3, ", "RES 5, ", "RES 7, ", "SET 1, ", "SET 3, ", "SET 5, ", "SET 7, " };
+            std::string registers[] = { "B", "C", "D", "E", "H", "L", "[HL]", "A" };
+
+            opcode = bus->cpu_read(current_address++);
+            if (opcode & 0x08) {
+                current_disassembled_instruction = op_half2[(opcode & 0xF0) >> 4];
+            } else {
+                current_disassembled_instruction = op_half1[(opcode & 0xF0) >> 4];
+            }
+
+            current_disassembled_instruction += registers[opcode & 0x07];
+
+            current_address++;
+        } else {
+            if (opcode >= 0x00 && opcode <= 0x3F) {
+                Uint8 byte;
+                Uint8 hi;
+                Uint8 lo;
+                Uint16 target_address;
+                switch (opcode) {
+                    case 0x00:
+                        current_disassembled_instruction = "NOP";
+                        break;
+                    case 0x10:
+                        current_disassembled_instruction = "STOP";
+                        break;
+                    case 0x20:
+                        byte = bus->cpu_read(current_address++);
+                        target_address = current_address + static_cast<Sint8>(byte);
+                        current_disassembled_instruction = "JR NZ, $" + hex(byte, 2) + " [$" + hex(target_address, 4) + "]";
+                        break;
+                    case 0x30:
+                        byte = bus->cpu_read(current_address++);
+                        target_address = current_address + static_cast<Sint8>(byte);
+                        current_disassembled_instruction = "JR NC, $" + hex(byte, 2) + " [$" + hex(target_address, 4) + "]";
+                        break;
+                    case 0x01:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD BC, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0x11:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD DE, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0x21:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD HL, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0x31:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD SP, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0x02:
+                        current_disassembled_instruction = "LD (BC), A";
+                        break;
+                    case 0x12:
+                        current_disassembled_instruction = "LD (DE), A";
+                        break;
+                    case 0x22:
+                        current_disassembled_instruction = "LD (HL+), A";
+                        break;
+                    case 0x32:
+                        current_disassembled_instruction = "LD (HL-), A";
+                        break;
+                    case 0x03:
+                        current_disassembled_instruction = "INC BC";
+                        break;
+                    case 0x13:
+                        current_disassembled_instruction = "INC DE";
+                        break;
+                    case 0x23:
+                        current_disassembled_instruction = "INC HL";
+                        break;
+                    case 0x33:
+                        current_disassembled_instruction = "INC SP";
+                        break;
+                    case 0x04:
+                        current_disassembled_instruction = "INC B";
+                        break;
+                    case 0x14:
+                        current_disassembled_instruction = "INC D";
+                        break;
+                    case 0x24:
+                        current_disassembled_instruction = "INC H";
+                        break;
+                    case 0x34:
+                        current_disassembled_instruction = "INC (HL)";
+                        break;
+                    case 0x05:
+                        current_disassembled_instruction = "DEC B";
+                        break;
+                    case 0x15:
+                        current_disassembled_instruction = "DEC D";
+                        break;
+                    case 0x25:
+                        current_disassembled_instruction = "DEC H";
+                        break;
+                    case 0x35:
+                        current_disassembled_instruction = "DEC (HL)";
+                        break;
+                    case 0x06:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD B, $" + hex(byte, 2);
+                        break;
+                    case 0x16:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD D, $" + hex(byte, 2);
+                        break;
+                    case 0x26:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD H, $" + hex(byte, 2);
+                        break;
+                    case 0x36:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD (HL), $" + hex(byte, 2);
+                        break;
+                    case 0x07:
+                        current_disassembled_instruction = "RLCA";
+                        break;
+                    case 0x17:
+                        current_disassembled_instruction = "RLA";
+                        break;
+                    case 0x27:
+                        current_disassembled_instruction = "DAA";
+                        break;
+                    case 0x37:
+                        current_disassembled_instruction = "SCF";
+                        break;
+                    case 0x08:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD ($" + hex(hi, 2) + hex(lo, 2) + "), SP";
+                        break;
+                    case 0x18:
+                        byte = bus->cpu_read(current_address++);
+                        target_address = current_address + static_cast<Sint8>(byte);
+                        current_disassembled_instruction = "JR $" + hex(byte, 2) + " [$" + hex(target_address, 4) + "]";
+                        break;
+                    case 0x28:
+                        byte = bus->cpu_read(current_address++);
+                        target_address = current_address + static_cast<Sint8>(byte);
+                        current_disassembled_instruction = "JR Z, $" + hex(byte, 2) + " [$" + hex(target_address, 4) + "]";
+                        break;
+                    case 0x38:
+                        byte = bus->cpu_read(current_address++);
+                        target_address = current_address + static_cast<Sint8>(byte);
+                        current_disassembled_instruction = "JR C, $" + hex(byte, 2) + " [$" + hex(target_address, 4) + "]";
+                        break;
+                    case 0x09:
+                        current_disassembled_instruction = "ADD HL, BC";
+                        break;
+                    case 0x19:
+                        current_disassembled_instruction = "ADD HL, DE";
+                        break;
+                    case 0x29:
+                        current_disassembled_instruction = "ADD HL, HL";
+                        break;
+                    case 0x39:
+                        current_disassembled_instruction = "ADD HL, SP";
+                        break;
+                    case 0x0A:
+                        current_disassembled_instruction = "LD A, (BC)";
+                        break;
+                    case 0x1A:
+                        current_disassembled_instruction = "LD A, (DE)";
+                        break;
+                    case 0x2A:
+                        current_disassembled_instruction = "LD A, (HL+)";
+                        break;
+                    case 0x3A:
+                        current_disassembled_instruction = "LD A, (HL-)";
+                        break;
+                    case 0x0B:
+                        current_disassembled_instruction = "DEC BC";
+                        break;
+                    case 0x1B:
+                        current_disassembled_instruction = "DEC DE";
+                        break;
+                    case 0x2B:
+                        current_disassembled_instruction = "DEC HL";
+                        break;
+                    case 0x3B:
+                        current_disassembled_instruction = "DEC SP";
+                        break;
+                    case 0x0C:
+                        current_disassembled_instruction = "INC C";
+                        break;
+                    case 0x1C:
+                        current_disassembled_instruction = "INC E";
+                        break;
+                    case 0x2C:
+                        current_disassembled_instruction = "INC L";
+                        break;
+                    case 0x3C:
+                        current_disassembled_instruction = "INC A";
+                        break;
+                    case 0x0D:
+                        current_disassembled_instruction = "DEC C";
+                        break;
+                    case 0x1D:
+                        current_disassembled_instruction = "DEC E";
+                        break;
+                    case 0x2D:
+                        current_disassembled_instruction = "DEC L";
+                        break;
+                    case 0x3D:
+                        current_disassembled_instruction = "DEC A";
+                        break;
+                    case 0x0E:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD C, $" + hex(byte, 2);
+                        break;
+                    case 0x1E:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD E, $" + hex(byte, 2);
+                        break;
+                    case 0x2E:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD L, $" + hex(byte, 2);
+                        break;
+                    case 0x3E:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD A, $" + hex(byte, 2);
+                        break;
+                    case 0x0F:
+                        current_disassembled_instruction = "RRCA";
+                        break;
+                    case 0x1F:
+                        current_disassembled_instruction = "RRA";
+                        break;
+                    case 0x2F:
+                        current_disassembled_instruction = "CPL";
+                        break;
+                    case 0x3F:
+                        current_disassembled_instruction = "CCF";
+                        break;
+                }
+            } else if (opcode >= 0x40 && opcode <= 0xBF) {
+                if (opcode == 0x76) {
+                    current_disassembled_instruction = "HALT";
+                } else {
+                    std::string registers[] = { "B", "C", "D", "E", "H", "L", "(HL)", "A" };
+                    std::string op_half1[] = { "LD B, ", "LD D, ", "LD H, ", "LD (HL), ", "ADD A, ", "SUB A, ", "AND A, ", "OR A, " };
+                    std::string op_half2[] = { "LD C, ", "LD E, ", "LD L, ", "LD A, ", "ADC A, ", "SBC A, ", "XOR A, ", "CP A, " };
+
+                    if (opcode & 0x08) {
+                        current_disassembled_instruction = op_half2[((opcode & 0xF0) >> 4) - 0x04];
+                    } else {
+                        current_disassembled_instruction = op_half1[((opcode & 0xF0) >> 4) - 0x04];
+                    }
+                    current_disassembled_instruction += registers[opcode & 0x07];
+                }
+            } else {
+                Uint8 byte;
+                Uint8 hi;
+                Uint8 lo;
+                switch (opcode) {
+                    case 0xC0:
+                        current_disassembled_instruction = "RET NZ";
+                        break;
+                    case 0xD0:
+                        current_disassembled_instruction = "RET NC";
+                        break;
+                    case 0xE0:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD ($" + hex(byte, 2) + "), A [$" + hex(0xFF00 | byte, 4) + "]";
+                        break;
+                    case 0xF0:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD A, ($" + hex(byte, 2) + ") [$" + hex(0xFF00 | byte, 4) + "]";
+                        break;
+                    case 0xC1:
+                        current_disassembled_instruction = "POP BC";
+                        break;
+                    case 0xD1:
+                        current_disassembled_instruction = "POP DE";
+                        break;
+                    case 0xE1:
+                        current_disassembled_instruction = "POP HL";
+                        break;
+                    case 0xF1:
+                        current_disassembled_instruction = "POP AF";
+                        break;
+                    case 0xC2:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "JP NZ, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xD2:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "JP NC, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xE2:
+                        current_disassembled_instruction = "LD (C), A";
+                        break;
+                    case 0xF2:
+                        current_disassembled_instruction = "LD A, (C)";
+                        break;
+                    case 0xC3:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "JP $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xD3:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xE3:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xF3:
+                        current_disassembled_instruction = "DI";
+                        break;
+                    case 0xC4:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "CALL NZ $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xD4:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "CALL NC $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xE4:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xF4:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xC5:
+                        current_disassembled_instruction = "PUSH BC";
+                        break;
+                    case 0xD5:
+                        current_disassembled_instruction = "PUSH DE";
+                        break;
+                    case 0xE5:
+                        current_disassembled_instruction = "PUSH HL";
+                        break;
+                    case 0xF5:
+                        current_disassembled_instruction = "PUSH AF";
+                        break;
+                    case 0xC6:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "ADD A, $" + hex(byte, 2);
+                        break;
+                    case 0xD6:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "SUB A, $" + hex(byte, 2);
+                        break;
+                    case 0xE6:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "AND A, $" + hex(byte, 2);
+                        break;
+                    case 0xF6:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "OR A, $" + hex(byte, 2);
+                        break;
+                    case 0xC7:
+                        current_disassembled_instruction = "RST 0";
+                        break;
+                    case 0xD7:
+                        current_disassembled_instruction = "RST 2";
+                        break;
+                    case 0xE7:
+                        current_disassembled_instruction = "RST 4";
+                        break;
+                    case 0xF7:
+                        current_disassembled_instruction = "RST 6";
+                        break;
+                    case 0xC8:
+                        current_disassembled_instruction = "RET Z";
+                        break;
+                    case 0xD8:
+                        current_disassembled_instruction = "RET C";
+                        break;
+                    case 0xE8:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "ADD SP, $" + hex(byte, 2);
+                        break;
+                    case 0xF8:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD HL, SP + $" + hex(byte, 2);
+                        break;
+                    case 0xC9:
+                        current_disassembled_instruction = "RET";
+                        break;
+                    case 0xD9:
+                        current_disassembled_instruction = "RETI";
+                        break;
+                    case 0xE9:
+                        current_disassembled_instruction = "JP HL";
+                        break;
+                    case 0xF9:
+                        current_disassembled_instruction = "LD SP, HL";
+                        break;
+                    case 0xCA:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "JP Z, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xDA:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "JP C, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xEA:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD ($" + hex(hi, 2) + hex(lo, 2) + "), A";
+                        break;
+                    case 0xFA:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "LD A, ($" + hex(hi, 2) + hex(lo, 2) + ")";
+                        break;
+                    case 0xCB:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xDB:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xEB:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xFB:
+                        current_disassembled_instruction = "EI";
+                        break;
+                    case 0xCC:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "CALL Z, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xDC:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "CALL C, $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xEC:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xFC:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xCD:
+                        lo = bus->cpu_read(current_address++);
+                        hi = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "CALL $" + hex(hi, 2) + hex(lo, 2);
+                        break;
+                    case 0xDD:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xED:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xFD:
+                        current_disassembled_instruction = "< BAD OPCODE!!! >";
+                        break;
+                    case 0xCE:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "ADC A, $" + hex(byte, 2);
+                        break;
+                    case 0xDE:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "SBC A, $" + hex(byte, 2);
+                        break;
+                    case 0xEE:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "XOR A, $" + hex(byte, 2);
+                        break;
+                    case 0xFE:
+                        byte = bus->cpu_read(current_address++);
+                        current_disassembled_instruction = "CP A, $" + hex(byte, 2);
+                        break;
+                    case 0xCF:
+                        current_disassembled_instruction = "RST 1";
+                        break;
+                    case 0xDF:
+                        current_disassembled_instruction = "RST 3";
+                        break;
+                    case 0xEF:
+                        current_disassembled_instruction = "RST 5";
+                        break;
+                    case 0xFF:
+                        current_disassembled_instruction = "RST 7";
+                        break;
+                }
+            }
+        }
+
+        output.push_back(instruction_address + current_disassembled_instruction);
     }
 }

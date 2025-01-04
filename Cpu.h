@@ -35,8 +35,9 @@ public:
     void clock();
     bool is_current_instruction_finished();
     void reset();
-    Cpu_Info get_cpu_info();
 
+    Cpu_Info get_cpu_info();
+    void disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output);
     void override_cpu_state(Cpu_Info& new_cpu_state);
 
 private:
@@ -214,8 +215,6 @@ private:
     Uint32 full_add_16bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
     Uint32 full_sub_8bit(Uint32 a, Uint32 b, bool carry_in, bool& half_carry_out, bool& carry_out);
     Uint16 get_fetched_u16();
-    void split_u16(Uint16 u16, Uint8& msb, Uint8& lsb);
-    Uint16 join_to_u16(Uint8 msb, Uint8 lsb);
 };
 
 #endif

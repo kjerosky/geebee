@@ -103,3 +103,9 @@ void GameBoy::clock() {
 
     cycle_count = (cycle_count + 1) % 4;
 }
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output) {
+    cpu->disassemble(start_address, num_of_instructions, output);
+}

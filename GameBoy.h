@@ -20,6 +20,7 @@ public:
     void execute_next_instruction();
     void complete_frame();
     Cpu_Info get_cpu_info();
+    void disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output);
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
     void generate_interrupt(int interrupt_bit);

@@ -5,9 +5,11 @@
 #include <string>
 #include <sstream>
 #include <cstdlib>
+#include <vector>
 
 #include "GameBoy.h"
 #include "Cartridge.h"
+#include "bit_utils.h"
 
 enum View {
     CPU_AND_RAM = 0,
@@ -15,17 +17,6 @@ enum View {
     SCREEN_ONLY,
     NUMBER_OF_ENTRIES,
 };
-
-std::string hex(unsigned int number, int width) {
-    std::string s(width, '0');
-    for (int i = width - 1; i >= 0; i--, number >>= 4) {
-        s[i] = "0123456789ABCDEF"[number & 0xF];
-    }
-
-    return s;
-}
-
-// ----------------------------------------------------------------------------
 
 void draw_string(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, std::string str) {
     SDL_Rect font_source;
@@ -54,8 +45,8 @@ void draw_string(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row
 // ----------------------------------------------------------------------------
 
 void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Uint16 ram_page, Uint8* ram_page_contents, Uint16 current_pc) {
-    draw_string(renderer, font_texture, text_row++, text_column, 2, "      |  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
-    draw_string(renderer, font_texture, text_row++, text_column, 2, "------+------------------------------------------------");
+    draw_string(renderer, font_texture, text_row++, text_column, scale, "      |  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+    draw_string(renderer, font_texture, text_row++, text_column, scale, "------+------------------------------------------------");
 
     for (Uint16 row = 0x0000; row <= 0x00F0; row += 0x0010) {
         std::string ram_row_contents = "$" + hex(ram_page + row, 4) + " |";
@@ -74,10 +65,10 @@ void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_r
             }
         }
 
-        draw_string(renderer, font_texture, text_row, text_column, 2, ram_row_contents);
+        draw_string(renderer, font_texture, text_row, text_column, scale, ram_row_contents);
         if ((current_pc & 0xFFF0) == (ram_page | row)) {
             SDL_SetTextureColorMod(font_texture, 0x00, 0xFF, 0x00);
-            draw_string(renderer, font_texture, text_row, text_column, 2, highlighted_ram_row_contents);
+            draw_string(renderer, font_texture, text_row, text_column, scale, highlighted_ram_row_contents);
             SDL_SetTextureColorMod(font_texture, 0xFF, 0xFF, 0xFF);
         }
 
@@ -86,25 +77,39 @@ void draw_ram_page(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_r
 }
 
 void draw_cpu_info(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Cpu_Info cpu_info) {
-    draw_string(renderer, font_texture, text_row, text_column, 2, "STATUS: ");
+    draw_string(renderer, font_texture, text_row, text_column, scale, "STATUS: ");
     SDL_SetTextureColorMod(font_texture, cpu_info.z_flag ? 0x00 : 0xFF, cpu_info.z_flag ? 0xFF : 0x00, 0x00);
-    draw_string(renderer, font_texture, text_row, text_column + 8, 2, "Z");
+    draw_string(renderer, font_texture, text_row, text_column + 8, scale, "Z");
     SDL_SetTextureColorMod(font_texture, cpu_info.n_flag ? 0x00 : 0xFF, cpu_info.n_flag ? 0xFF : 0x00, 0x00);
-    draw_string(renderer, font_texture, text_row, text_column + 10, 2, "N");
+    draw_string(renderer, font_texture, text_row, text_column + 10, scale, "N");
     SDL_SetTextureColorMod(font_texture, cpu_info.h_flag ? 0x00 : 0xFF, cpu_info.h_flag ? 0xFF : 0x00, 0x00);
-    draw_string(renderer, font_texture, text_row, text_column + 12, 2, "H");
+    draw_string(renderer, font_texture, text_row, text_column + 12, scale, "H");
     SDL_SetTextureColorMod(font_texture, cpu_info.c_flag ? 0x00 : 0xFF, cpu_info.c_flag ? 0xFF : 0x00, 0x00);
-    draw_string(renderer, font_texture, text_row, text_column + 14, 2, "C");
+    draw_string(renderer, font_texture, text_row, text_column + 14, scale, "C");
     SDL_SetTextureColorMod(font_texture, 0xFF, 0xFF, 0xFF);
 
-    draw_string(renderer, font_texture, text_row + 2, text_column, 2, "A: $" + hex(cpu_info.a, 2));
-    draw_string(renderer, font_texture, text_row + 3, text_column, 2, "B: $" + hex(cpu_info.b, 2) + "    C: $" + hex(cpu_info.c, 2));
-    draw_string(renderer, font_texture, text_row + 4, text_column, 2, "D: $" + hex(cpu_info.d, 2) + "    E: $" + hex(cpu_info.e, 2));
-    draw_string(renderer, font_texture, text_row + 5, text_column, 2, "H: $" + hex(cpu_info.h, 2) + "    L: $" + hex(cpu_info.l, 2));
-    draw_string(renderer, font_texture, text_row + 7, text_column, 2, "PC: $" + hex(cpu_info.pc, 4));
-    draw_string(renderer, font_texture, text_row + 8, text_column, 2, "SP: $" + hex(cpu_info.sp, 4));
+    draw_string(renderer, font_texture, text_row + 2, text_column, scale, "A: $" + hex(cpu_info.a, 2));
+    draw_string(renderer, font_texture, text_row + 3, text_column, scale, "B: $" + hex(cpu_info.b, 2) + "    C: $" + hex(cpu_info.c, 2));
+    draw_string(renderer, font_texture, text_row + 4, text_column, scale, "D: $" + hex(cpu_info.d, 2) + "    E: $" + hex(cpu_info.e, 2));
+    draw_string(renderer, font_texture, text_row + 5, text_column, scale, "H: $" + hex(cpu_info.h, 2) + "    L: $" + hex(cpu_info.l, 2));
+    draw_string(renderer, font_texture, text_row + 7, text_column, scale, "PC: $" + hex(cpu_info.pc, 4));
+    draw_string(renderer, font_texture, text_row + 8, text_column, scale, "SP: $" + hex(cpu_info.sp, 4));
 
-    draw_string(renderer, font_texture, text_row + 10, text_column, 2, "IME: " + std::string(cpu_info.ime ? "1" : "0"));
+    draw_string(renderer, font_texture, text_row + 10, text_column, scale, "IME: " + std::string(cpu_info.ime ? "1" : "0"));
+}
+
+// ----------------------------------------------------------------------------
+
+void draw_disassembly(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, std::vector<std::string>& disassembled_lines) {
+    if (!disassembled_lines.empty()) {
+        SDL_SetTextureColorMod(font_texture, 0x00, 0xFF, 0x00);
+        draw_string(renderer, font_texture, text_row, text_column, scale, disassembled_lines[0]);
+    }
+
+    SDL_SetTextureColorMod(font_texture, 0xFF, 0xFF, 0xFF);
+    for (int i = 1; i < disassembled_lines.size(); i++) {
+        draw_string(renderer, font_texture, text_row + i, text_column, scale, disassembled_lines[i]);
+    }
 }
 
 // ----------------------------------------------------------------------------
@@ -232,6 +237,8 @@ int main(int argc, char* argv[]) {
     Uint64 previous_counter;
     double residual_time;
 
+    std::vector<std::string> disassembled_lines;
+
     bool is_main_program_running = true;
     while (is_main_program_running) {
         SDL_Event event;
@@ -293,14 +300,20 @@ int main(int argc, char* argv[]) {
             SDL_RenderClear(renderer);
 
             refresh_ram_page_contents(game_boy, ram_page_contents, ram_page);
-
             draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_page_contents, current_cpu_info.pc);
+
             draw_cpu_info(renderer, font_texture, 22, 1, 2, current_cpu_info);
+
+            game_boy.disassemble(current_cpu_info.pc, 10, disassembled_lines);
+            draw_disassembly(renderer, font_texture, 22, 24, 2, disassembled_lines);
         } else if (view == View::CPU_AND_SCREEN) {
             SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
             SDL_RenderClear(renderer);
 
             draw_cpu_info(renderer, font_texture, 1, 43, 2, current_cpu_info);
+
+            game_boy.disassemble(current_cpu_info.pc, 10, disassembled_lines);
+            draw_disassembly(renderer, font_texture, 14, 43, 2, disassembled_lines);
 
             SDL_Rect screen_destination_rect;
             screen_destination_rect.x = 0;
