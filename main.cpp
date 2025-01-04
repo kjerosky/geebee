@@ -227,22 +227,31 @@ int main(int argc, char* argv[]) {
     // setup_ram_for_testing(game_boy, initial_pc);
 
     int view = (int)View::CPU_AND_SCREEN;
+    bool is_continuously_running = false;
+    Uint64 current_counter;
+    Uint64 previous_counter;
+    double residual_time;
 
-    bool is_running = true;
-    while (is_running) {
+    bool is_main_program_running = true;
+    while (is_main_program_running) {
         SDL_Event event;
         while (SDL_PollEvent(&event) != 0) {
             if (event.type == SDL_QUIT) {
-                is_running = false;
+                is_main_program_running = false;
             } else if (event.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    is_running = false;
+                    is_main_program_running = false;
                 } else if (event.key.keysym.sym == SDLK_TAB) {
                     view = (view + 1) % View::NUMBER_OF_ENTRIES;
-                } else if (event.key.keysym.sym == SDLK_SPACE) {
+                } else if (event.key.keysym.sym == SDLK_SPACE && !is_continuously_running) {
                     game_boy.execute_next_instruction();
                     ram_page = game_boy.get_cpu_info().pc & 0xFF00;
-                } else if (event.key.keysym.sym == SDLK_f) {
+                } else if (event.key.keysym.sym == SDLK_RETURN) {
+                    is_continuously_running = !is_continuously_running;
+                    current_counter = SDL_GetPerformanceCounter();
+                    previous_counter = current_counter;
+                    residual_time = 0;
+                } else if (event.key.keysym.sym == SDLK_f && !is_continuously_running) {
                     game_boy.complete_frame();
                 } else if (event.key.keysym.sym == SDLK_EQUALS) {
                     ram_page = ram_page + 0x0100;
@@ -262,12 +271,28 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        if (is_continuously_running) {
+            ram_page = game_boy.get_cpu_info().pc & 0xFF00;
+
+            previous_counter = current_counter;
+            current_counter = SDL_GetPerformanceCounter();
+            double delta_time = static_cast<double>(current_counter - previous_counter) / static_cast<double>(SDL_GetPerformanceFrequency());
+
+            if (residual_time > 0.0) {
+                residual_time -= delta_time;
+            } else {
+                residual_time += (1.0 / 60.0) - delta_time;
+                game_boy.complete_frame();
+            }
+        }
+
         Cpu_Info current_cpu_info = game_boy.get_cpu_info();
-        refresh_ram_page_contents(game_boy, ram_page_contents, ram_page);
 
         if (view == View::CPU_AND_RAM) {
             SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
             SDL_RenderClear(renderer);
+
+            refresh_ram_page_contents(game_boy, ram_page_contents, ram_page);
 
             draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_page_contents, current_cpu_info.pc);
             draw_cpu_info(renderer, font_texture, 22, 1, 2, current_cpu_info);
