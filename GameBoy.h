@@ -6,15 +6,19 @@
 class Cpu;
 class Bus;
 class Cartridge;
+struct SDL_Texture;
+struct SDL_PixelFormat;
+class Ppu;
 
 class GameBoy {
 
 public:
 
-    GameBoy(Cartridge* cartridge);
+    GameBoy(Cartridge* cartridge, SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format);
     ~GameBoy();
 
     void execute_next_instruction();
+    void complete_frame();
     Cpu_Info get_cpu_info();
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
@@ -26,6 +30,11 @@ private:
 
     Cpu* cpu;
     Bus* bus;
+    Ppu* ppu;
+
+    int cycle_count;
+
+    void clock();
 };
 
 #endif

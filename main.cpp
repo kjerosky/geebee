@@ -9,6 +9,13 @@
 #include "GameBoy.h"
 #include "Cartridge.h"
 
+enum View {
+    CPU_AND_RAM = 0,
+    CPU_AND_SCREEN,
+    SCREEN_ONLY,
+    NUMBER_OF_ENTRIES,
+};
+
 std::string hex(unsigned int number, int width) {
     std::string s(width, '0');
     for (int i = width - 1; i >= 0; i--, number >>= 4) {
@@ -154,7 +161,7 @@ void refresh_ram_page_contents(GameBoy& game_boy, Uint8* ram_page_contents, Uint
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " rom_file" << std::endl;
-        exit(1);
+        return 1;
     }
 
     std::string rom_filename = argv[1];
@@ -188,13 +195,38 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    SDL_Texture* screen_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, GAMEBOY_SCREEN_WIDTH, GAMEBOY_SCREEN_HEIGHT);
+    if (screen_texture == NULL) {
+        std::cerr << "ERROR: Screen texture could not be created!  SDL error: " << SDL_GetError() << std::endl;
+        SDL_DestroyTexture(font_texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+    }
+
+    Uint32 texture_format;
+    int screen_texture_width;
+    int screen_texture_height;
+    SDL_QueryTexture(screen_texture, &texture_format, NULL, &screen_texture_width, &screen_texture_height);
+
+    SDL_PixelFormat* screen_texture_pixel_format = SDL_AllocFormat(texture_format);
+    if (screen_texture_pixel_format == NULL) {
+        std::cerr<< "ERROR: Screen texture pixel format could not be allocated!  SDL error: " << SDL_GetError() << std::endl;
+        SDL_DestroyTexture(screen_texture);
+        SDL_DestroyTexture(font_texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        return 1;
+    }
+
     Cartridge cartridge(rom_filename);
-    GameBoy game_boy(&cartridge);
+    GameBoy game_boy(&cartridge, screen_texture, screen_texture_pixel_format);
     Uint8 ram_page_contents[256];
     Uint16 initial_pc = game_boy.get_cpu_info().pc;
     Uint16 ram_page = initial_pc & 0xFF00;
 
     // setup_ram_for_testing(game_boy, initial_pc);
+
+    int view = (int)View::CPU_AND_SCREEN;
 
     bool is_running = true;
     while (is_running) {
@@ -205,9 +237,13 @@ int main(int argc, char* argv[]) {
             } else if (event.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     is_running = false;
+                } else if (event.key.keysym.sym == SDLK_TAB) {
+                    view = (view + 1) % View::NUMBER_OF_ENTRIES;
                 } else if (event.key.keysym.sym == SDLK_SPACE) {
                     game_boy.execute_next_instruction();
                     ram_page = game_boy.get_cpu_info().pc & 0xFF00;
+                } else if (event.key.keysym.sym == SDLK_f) {
+                    game_boy.complete_frame();
                 } else if (event.key.keysym.sym == SDLK_EQUALS) {
                     ram_page = ram_page + 0x0100;
                 } else if (event.key.keysym.sym == SDLK_MINUS) {
@@ -229,15 +265,58 @@ int main(int argc, char* argv[]) {
         Cpu_Info current_cpu_info = game_boy.get_cpu_info();
         refresh_ram_page_contents(game_boy, ram_page_contents, ram_page);
 
-        SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
-        SDL_RenderClear(renderer);
+        if (view == View::CPU_AND_RAM) {
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
+            SDL_RenderClear(renderer);
 
-        draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_page_contents, current_cpu_info.pc);
-        draw_cpu_info(renderer, font_texture, 22, 1, 2, current_cpu_info);
+            draw_ram_page(renderer, font_texture, 1, 1, 2, ram_page, ram_page_contents, current_cpu_info.pc);
+            draw_cpu_info(renderer, font_texture, 22, 1, 2, current_cpu_info);
+        } else if (view == View::CPU_AND_SCREEN) {
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
+            SDL_RenderClear(renderer);
+
+            draw_cpu_info(renderer, font_texture, 1, 43, 2, current_cpu_info);
+
+            SDL_Rect screen_destination_rect;
+            screen_destination_rect.x = 0;
+            screen_destination_rect.y = 0;
+            screen_destination_rect.w = GAMEBOY_SCREEN_WIDTH * 4;
+            screen_destination_rect.h = GAMEBOY_SCREEN_HEIGHT * 4;
+            SDL_RenderCopy(renderer, screen_texture, NULL, &screen_destination_rect);
+        } else if (view == View::SCREEN_ONLY) {
+            int window_width;
+            int window_height;
+            SDL_GetWindowSize(window, &window_width, &window_height);
+
+            // Make sure the screen texture fills the window, but maintains
+            // its original width/height ratio.
+            float texture_width_to_height_ratio = (float)screen_texture_width / (float)screen_texture_height;
+            SDL_Rect ratio_maintained_maximized_texture_rect;
+            if (window_width - screen_texture_width >= window_height - screen_texture_height) {
+                int new_width = texture_width_to_height_ratio * window_height;
+                ratio_maintained_maximized_texture_rect.x = (window_width - new_width) / 2;
+                ratio_maintained_maximized_texture_rect.y = 0;
+                ratio_maintained_maximized_texture_rect.w = new_width;
+                ratio_maintained_maximized_texture_rect.h = window_height;
+            } else {
+                int new_height = window_width / texture_width_to_height_ratio;
+                ratio_maintained_maximized_texture_rect.x = 0;
+                ratio_maintained_maximized_texture_rect.y = (window_height - new_height) / 2;
+                ratio_maintained_maximized_texture_rect.w = window_width;
+                ratio_maintained_maximized_texture_rect.h = new_height;
+            }
+
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
+            SDL_RenderClear(renderer);
+            SDL_RenderCopy(renderer, screen_texture, NULL, &ratio_maintained_maximized_texture_rect);
+            SDL_RenderPresent(renderer);
+        }
 
         SDL_RenderPresent(renderer);
     }
 
+    SDL_FreeFormat(screen_texture_pixel_format);
+    SDL_DestroyTexture(screen_texture);
     SDL_DestroyTexture(font_texture);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);

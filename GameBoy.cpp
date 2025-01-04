@@ -2,15 +2,20 @@
 #include "Bus.h"
 #include "Cpu.h"
 #include "Cartridge.h"
+#include "Ppu.h"
 
-GameBoy::GameBoy(Cartridge* cartridge) {
+GameBoy::GameBoy(Cartridge* cartridge, SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format) {
     bus = new Bus(cartridge);
     cpu = new Cpu(bus);
+    ppu = new Ppu(screen_texture, screen_texture_pixel_format);
+
+    cycle_count = 0;
 }
 
 // ----------------------------------------------------------------------------
 
 GameBoy::~GameBoy() {
+    delete ppu;
     delete cpu;
     delete bus;
 }
@@ -18,9 +23,39 @@ GameBoy::~GameBoy() {
 // ----------------------------------------------------------------------------
 
 void GameBoy::execute_next_instruction() {
+    ppu->lock_screen_texture();
+
     do {
-        cpu->clock();
+        clock();
     } while (!cpu->is_current_instruction_finished());
+
+    // Drain any remaining ppu clock cycles so that the next instruction will
+    // be executed immediately.
+    while (cycle_count % 4 != 0) {
+        clock();
+    }
+
+    ppu->unlock_screen_texture();
+}
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::complete_frame() {
+    ppu->lock_screen_texture();
+
+    do {
+        clock();
+    } while (!ppu->is_frame_complete());
+
+    // Drain any remaining ppu clock cycles so that the next instruction will
+    // be executed immediately. This is okay to do, as any extra executed ppu
+    // clock cycles will happen during the oam scan section of the topmost
+    // scanline, which doesn't output pixels.
+    while (cycle_count % 4 != 0) {
+        clock();
+    }
+
+    ppu->unlock_screen_texture();
 }
 
 // ----------------------------------------------------------------------------
@@ -55,4 +90,16 @@ Uint8 GameBoy::read_from_bus(Uint16 address) {
 
 void GameBoy::write_to_bus(Uint16 address, Uint8 value) {
     bus->cpu_write(address, value);
+}
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::clock() {
+    ppu->clock();
+
+    if (cycle_count % 4 == 0) {
+        cpu->clock();
+    }
+
+    cycle_count = (cycle_count + 1) % 4;
 }
