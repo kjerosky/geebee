@@ -9,7 +9,10 @@ Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_form
   screen_texture_pixel_format(screen_texture_pixel_format),
   scanline(0),
   scanline_dot(0),
-  frame_complete(false) {
+  frame_complete(false),
+  bg_palette(0x00),
+  obj_palette_0(0x00),
+  obj_palette_1(0x00) {
     std::memset(video_ram, 0x00, VIDEO_RAM_SIZE * sizeof(Uint8));
 
     gameboy_pocket_colors[0] = SDL_MapRGB(this->screen_texture_pixel_format, 0xFF, 0xFF, 0xFF);
@@ -89,6 +92,15 @@ Uint8 Ppu::cpu_read(Uint16 address) {
         case 0xFF44:
             return scanline;
             break;
+        case 0xFF47:
+            return bg_palette;
+            break;
+        case 0xFF48:
+            return obj_palette_0;
+            break;
+        case 0xFF49:
+            return obj_palette_1;
+            break;
         default:
             return 0xFF;
             break;
@@ -104,6 +116,15 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
     }
 
     switch (address) {
+        case 0xFF47:
+            bg_palette = value;
+            break;
+        case 0xFF48:
+            obj_palette_0 = value;
+            break;
+        case 0xFF49:
+            obj_palette_1 = value;
+            break;
         default:
             // ignore unspecified writes
             break;
@@ -128,17 +149,35 @@ void Ppu::render_vram_to_texture(SDL_Texture* texture, int texture_width, int te
                 vram_index += 2;
 
                 for (int bit = 7; bit >= 0; bit--) {
-                    int pixel_x = 7 - bit;
                     int color_index = (((hi_byte >> bit) & 0x01) ? 0x02 : 0x00) | ((lo_byte >> bit) & 0x01);
+                    int mapped_bg_color_index = (bg_palette >> (color_index * 2)) & 0x03;
 
+                    int pixel_x = 7 - bit;
                     int texture_pixel_x = tile_x * 8 + pixel_x;
                     int texture_pixel_y = tile_y * 8 + pixel_y;
                     int texture_pixel_index = texture_pixel_y * texture_width + texture_pixel_x;
-                    texture_pixels[texture_pixel_index] = gameboy_pocket_colors[color_index];
+                    texture_pixels[texture_pixel_index] = gameboy_pocket_colors[mapped_bg_color_index];
                 }
             }
         }
     }
 
     SDL_UnlockTexture(texture);
+}
+
+// ----------------------------------------------------------------------------
+
+void Ppu::get_palette_colors(Uint32* output) {
+    output[0] = gameboy_pocket_colors[bg_palette & 0x03];
+    output[1] = gameboy_pocket_colors[(bg_palette >> 2) & 0x03];
+    output[2] = gameboy_pocket_colors[(bg_palette >> 4) & 0x03];
+    output[3] = gameboy_pocket_colors[(bg_palette >> 6) & 0x03];
+    output[4] = gameboy_pocket_colors[obj_palette_0 & 0x03];
+    output[5] = gameboy_pocket_colors[(obj_palette_0 >> 2) & 0x03];
+    output[6] = gameboy_pocket_colors[(obj_palette_0 >> 4) & 0x03];
+    output[7] = gameboy_pocket_colors[(obj_palette_0 >> 6) & 0x03];
+    output[8] = gameboy_pocket_colors[obj_palette_1 & 0x03];
+    output[9] = gameboy_pocket_colors[(obj_palette_1 >> 2) & 0x03];
+    output[10] = gameboy_pocket_colors[(obj_palette_1 >> 4) & 0x03];
+    output[11] = gameboy_pocket_colors[(obj_palette_1 >> 6) & 0x03];
 }

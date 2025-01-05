@@ -371,6 +371,26 @@ int main(int argc, char* argv[]) {
             vram_destination_rect.y = 10;
             vram_destination_rect.w = VRAM_TEXTURE_WIDTH * 3;
             vram_destination_rect.h = VRAM_TEXTURE_HEIGHT * 3;
+
+            Uint32 palette_colors[12];
+            game_boy.get_palette_colors(palette_colors);
+            SDL_Rect palette_color_rect;
+            palette_color_rect.x = 10;
+            palette_color_rect.y = 600;
+            palette_color_rect.w = 20;
+            palette_color_rect.h = 20;
+            for (int i = 0; i < 12; i++) {
+                Uint8 r, g, b, a;
+                SDL_GetRGBA(palette_colors[i], screen_texture_pixel_format, &r, &g, &b, &a);
+                SDL_SetRenderDrawColor(renderer, r, g, b, a);
+                SDL_RenderFillRect(renderer, &palette_color_rect);
+
+                palette_color_rect.x += 25;
+                if ((i + 1) % 4 == 0) {
+                    palette_color_rect.x += 25;
+                }
+            }
+
             SDL_RenderCopy(renderer, vram_texture, NULL, &vram_destination_rect);
         }
 

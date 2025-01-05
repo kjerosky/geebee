@@ -22,6 +22,7 @@ public:
     Uint8 cpu_read(Uint16 address);
     void cpu_write(Uint16 address, Uint8 value);
     void render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height);
+    void get_palette_colors(Uint32* output);
 
 private:
 
@@ -38,6 +39,9 @@ private:
     int screen_pixels_row_length;
 
     Uint32 gameboy_pocket_colors[COLORS_SIZE];
+    Uint8 bg_palette;
+    Uint8 obj_palette_0;
+    Uint8 obj_palette_1;
 };
 
 #endif

@@ -115,3 +115,9 @@ void GameBoy::disassemble(Uint16 start_address, int num_of_instructions, std::ve
 void GameBoy::render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
     ppu->render_vram_to_texture(texture, texture_width, texture_height);
 }
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::get_palette_colors(Uint32* output) {
+    ppu->get_palette_colors(output);
+}
