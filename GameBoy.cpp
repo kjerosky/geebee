@@ -5,9 +5,9 @@
 #include "Ppu.h"
 
 GameBoy::GameBoy(Cartridge* cartridge, SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format) {
-    bus = new Bus(cartridge);
-    cpu = new Cpu(bus);
     ppu = new Ppu(screen_texture, screen_texture_pixel_format);
+    bus = new Bus(ppu, cartridge);
+    cpu = new Cpu(bus);
 
     cycle_count = 0;
 }
