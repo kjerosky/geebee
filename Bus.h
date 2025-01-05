@@ -27,6 +27,8 @@ private:
     Uint8 work_ram_bank_0[WORK_RAM_BANK_SIZE];
     Uint8 work_ram_bank_1[WORK_RAM_BANK_SIZE];
     Uint8 high_ram[HIGH_RAM_SIZE];
+
+    Uint8 interrupt_flag_register;
     Uint8 interrupt_enable_register;
 
     Uint8 read_from_io_register(Uint16 address);

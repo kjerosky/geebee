@@ -8,6 +8,7 @@
 Bus::Bus(Ppu* ppu, Cartridge* cartridge)
 : ppu(ppu),
   cartridge(cartridge),
+  interrupt_flag_register(0x00),
   interrupt_enable_register(0x00) {
     std::memset(work_ram_bank_0, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(work_ram_bank_1, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
@@ -91,7 +92,9 @@ void Bus::cpu_write(Uint16 address, Uint8 value) {
 Uint8 Bus::read_from_io_register(Uint16 address) {
     Uint8 read_value = 0xFF;
 
-    if (address >= 0xFF40 && address <= 0xFF6C) {
+    if (address == 0xFF0F) {
+        read_value = interrupt_flag_register;
+    } else if (address >= 0xFF40 && address <= 0xFF6C) {
         read_value = ppu->cpu_read(address);
     }
 
@@ -101,7 +104,9 @@ Uint8 Bus::read_from_io_register(Uint16 address) {
 // ----------------------------------------------------------------------------
 
 void Bus::write_to_io_register(Uint16 address, Uint8 value) {
-    if (address >= 0xFF40 && address <= 0xFF6C) {
+    if (address == 0xFF0F) {
+        interrupt_flag_register = value;
+    } else if (address >= 0xFF40 && address <= 0xFF6C) {
         ppu->cpu_write(address, value);
     }
 }

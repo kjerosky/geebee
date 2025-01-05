@@ -42,6 +42,14 @@ private:
     Uint8 bg_palette;
     Uint8 obj_palette_0;
     Uint8 obj_palette_1;
+
+    Uint8 lcd_control;
+    Uint8 lcd_status;
+    Uint8 viewport_y;
+    Uint8 viewport_x;
+    Uint8 scanline_compare;
+    Uint8 window_y;
+    Uint8 window_x_plus_7;
 };
 
 #endif

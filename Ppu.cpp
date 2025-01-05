@@ -89,8 +89,26 @@ Uint8 Ppu::cpu_read(Uint16 address) {
     }
 
     switch (address) {
+        case 0xFF40:
+            return lcd_control;
+            break;
+        case 0xFF41:
+            return lcd_status;
+            break;
+        case 0xFF42:
+            return viewport_y;
+            break;
+        case 0xFF43:
+            return viewport_x;
+            break;
         case 0xFF44:
             return scanline;
+            break;
+        case 0xFF45:
+            return scanline_compare;
+            break;
+        case 0xFF46:
+            // oam dma source address and start
             break;
         case 0xFF47:
             return bg_palette;
@@ -101,10 +119,15 @@ Uint8 Ppu::cpu_read(Uint16 address) {
         case 0xFF49:
             return obj_palette_1;
             break;
-        default:
-            return 0xFF;
+        case 0xFF4A:
+            return window_y;
+            break;
+        case 0xFF4B:
+            return window_x_plus_7;
             break;
     }
+
+    return 0xFF;
 }
 
 // ----------------------------------------------------------------------------
@@ -116,6 +139,24 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
     }
 
     switch (address) {
+        case 0xFF40:
+            lcd_control = value;
+            break;
+        case 0xFF41:
+            lcd_status = value;
+            break;
+        case 0xFF42:
+            viewport_y = value;
+            break;
+        case 0xFF43:
+            viewport_x = value;
+            break;
+        case 0xFF45:
+            scanline_compare = value;
+            break;
+        case 0xFF46:
+            // oam dma source address and start
+            break;
         case 0xFF47:
             bg_palette = value;
             break;
@@ -124,6 +165,12 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
             break;
         case 0xFF49:
             obj_palette_1 = value;
+            break;
+        case 0xFF4A:
+            window_y = value;
+            break;
+        case 0xFF4B:
+            window_x_plus_7 = value;
             break;
         default:
             // ignore unspecified writes
