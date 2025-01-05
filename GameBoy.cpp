@@ -109,3 +109,9 @@ void GameBoy::clock() {
 void GameBoy::disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output) {
     cpu->disassemble(start_address, num_of_instructions, output);
 }
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
+    ppu->render_vram_to_texture(texture, texture_width, texture_height);
+}

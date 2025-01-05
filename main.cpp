@@ -15,6 +15,7 @@ enum View {
     CPU_AND_RAM = 0,
     CPU_AND_SCREEN,
     SCREEN_ONLY,
+    VRAM,
     NUMBER_OF_ENTRIES,
 };
 
@@ -223,6 +224,18 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    const int VRAM_TEXTURE_WIDTH = 128;
+    const int VRAM_TEXTURE_HEIGHT = 192;
+    SDL_Texture* vram_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, VRAM_TEXTURE_WIDTH, VRAM_TEXTURE_HEIGHT);
+    if (screen_texture == NULL) {
+        std::cerr << "ERROR: VRAM texture could not be created!  SDL error: " << SDL_GetError() << std::endl;
+        SDL_FreeFormat(screen_texture_pixel_format);
+        SDL_DestroyTexture(screen_texture);
+        SDL_DestroyTexture(font_texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+    }
+
     Cartridge cartridge(rom_filename);
     GameBoy game_boy(&cartridge, screen_texture, screen_texture_pixel_format);
     Uint8 ram_page_contents[256];
@@ -347,12 +360,24 @@ int main(int argc, char* argv[]) {
             SDL_SetRenderDrawColor(renderer, 0x00, 0x00, 0x00, 0x00);
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, screen_texture, NULL, &ratio_maintained_maximized_texture_rect);
-            SDL_RenderPresent(renderer);
+        } else if (view == View::VRAM) {
+            SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
+            SDL_RenderClear(renderer);
+
+            game_boy.render_vram_to_texture(vram_texture, VRAM_TEXTURE_WIDTH, VRAM_TEXTURE_HEIGHT);
+
+            SDL_Rect vram_destination_rect;
+            vram_destination_rect.x = 10;
+            vram_destination_rect.y = 10;
+            vram_destination_rect.w = VRAM_TEXTURE_WIDTH * 3;
+            vram_destination_rect.h = VRAM_TEXTURE_HEIGHT * 3;
+            SDL_RenderCopy(renderer, vram_texture, NULL, &vram_destination_rect);
         }
 
         SDL_RenderPresent(renderer);
     }
 
+    SDL_DestroyTexture(vram_texture);
     SDL_FreeFormat(screen_texture_pixel_format);
     SDL_DestroyTexture(screen_texture);
     SDL_DestroyTexture(font_texture);

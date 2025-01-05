@@ -12,10 +12,10 @@ Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_form
   frame_complete(false) {
     std::memset(video_ram, 0x00, VIDEO_RAM_SIZE * sizeof(Uint8));
 
-    gameboy_pocket_colors[0] = SDL_MapRGB(this->screen_texture_pixel_format, 0x00, 0x00, 0x00);
-    gameboy_pocket_colors[1] = SDL_MapRGB(this->screen_texture_pixel_format, 0x55, 0x55, 0x55);
-    gameboy_pocket_colors[2] = SDL_MapRGB(this->screen_texture_pixel_format, 0xAA, 0xAA, 0xAA);
-    gameboy_pocket_colors[3] = SDL_MapRGB(this->screen_texture_pixel_format, 0xFF, 0xFF, 0xFF);
+    gameboy_pocket_colors[0] = SDL_MapRGB(this->screen_texture_pixel_format, 0xFF, 0xFF, 0xFF);
+    gameboy_pocket_colors[1] = SDL_MapRGB(this->screen_texture_pixel_format, 0xAA, 0xAA, 0xAA);
+    gameboy_pocket_colors[2] = SDL_MapRGB(this->screen_texture_pixel_format, 0x55, 0x55, 0x55);
+    gameboy_pocket_colors[3] = SDL_MapRGB(this->screen_texture_pixel_format, 0x00, 0x00, 0x00);
 }
 
 // ----------------------------------------------------------------------------
@@ -108,4 +108,37 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
             // ignore unspecified writes
             break;
     }
+}
+
+// ----------------------------------------------------------------------------
+
+void Ppu::render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
+    Uint32* texture_pixels;
+    int texture_pixels_row_length;
+    SDL_LockTexture(texture, NULL, (void**)&texture_pixels, &texture_pixels_row_length);
+
+    int horizontal_tiles = texture_width / 8;
+    int vertical_tiles = texture_height / 8;
+    int vram_index = 0;
+    for (int tile_y = 0; tile_y < vertical_tiles; tile_y++) {
+        for (int tile_x = 0; tile_x < horizontal_tiles; tile_x++) {
+            for (int pixel_y = 0; pixel_y < 8; pixel_y++) {
+                Uint8 lo_byte = video_ram[vram_index];
+                Uint8 hi_byte = video_ram[vram_index + 1];
+                vram_index += 2;
+
+                for (int bit = 7; bit >= 0; bit--) {
+                    int pixel_x = 7 - bit;
+                    int color_index = (((hi_byte >> bit) & 0x01) ? 0x02 : 0x00) | ((lo_byte >> bit) & 0x01);
+
+                    int texture_pixel_x = tile_x * 8 + pixel_x;
+                    int texture_pixel_y = tile_y * 8 + pixel_y;
+                    int texture_pixel_index = texture_pixel_y * texture_width + texture_pixel_x;
+                    texture_pixels[texture_pixel_index] = gameboy_pocket_colors[color_index];
+                }
+            }
+        }
+    }
+
+    SDL_UnlockTexture(texture);
 }

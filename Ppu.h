@@ -5,6 +5,7 @@
 
 #define COLORS_SIZE 4
 #define VIDEO_RAM_SIZE 8192
+#define TILE_DATA_SIZE 6144
 
 class Ppu {
 
@@ -20,6 +21,7 @@ public:
 
     Uint8 cpu_read(Uint16 address);
     void cpu_write(Uint16 address, Uint8 value);
+    void render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height);
 
 private:
 

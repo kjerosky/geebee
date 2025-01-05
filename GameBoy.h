@@ -21,6 +21,7 @@ public:
     void complete_frame();
     Cpu_Info get_cpu_info();
     void disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output);
+    void render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height);
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
     void generate_interrupt(int interrupt_bit);
