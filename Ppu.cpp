@@ -186,7 +186,7 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
 
 // ----------------------------------------------------------------------------
 
-void Ppu::render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
+void Ppu::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
     Uint32* texture_pixels;
     int texture_pixels_row_length;
     SDL_LockTexture(texture, NULL, (void**)&texture_pixels, &texture_pixels_row_length);
@@ -233,4 +233,41 @@ void Ppu::get_palette_colors(Uint32* output) {
     output[9] = gameboy_pocket_colors[(obj_palette_1 >> 2) & 0x03];
     output[10] = gameboy_pocket_colors[(obj_palette_1 >> 4) & 0x03];
     output[11] = gameboy_pocket_colors[(obj_palette_1 >> 6) & 0x03];
+}
+
+// ----------------------------------------------------------------------------
+
+void Ppu::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width) {
+    int horizontal_tiles_count = tiles_texture_width / 8;
+
+    SDL_Rect tile_rect;
+    tile_rect.x = 0;
+    tile_rect.y = 0;
+    tile_rect.w = 8;
+    tile_rect.h = 8;
+
+    SDL_Rect map_tile_rect;
+    map_tile_rect.x = 0;
+    map_tile_rect.y = 0;
+    map_tile_rect.w = 8;
+    map_tile_rect.h = 8;
+
+    bool bg_and_obj_share_same_memory = ((lcd_control >> 4) & 0x01) == 0x01;
+    Uint16 base_tile_map_address = tile_map_index == 0 ? 0x1800 : 0x1C00;
+
+    for (int map_tile_y = 0; map_tile_y < 32; map_tile_y++) {
+        for (int map_tile_x = 0; map_tile_x < 32; map_tile_x++) {
+            map_tile_rect.x = map_tile_x * 8;
+            map_tile_rect.y = map_tile_y * 8;
+
+            int tile_map_offset = map_tile_y * 32 + map_tile_x;
+            Uint8 map_tile_id = video_ram[base_tile_map_address + tile_map_offset];
+
+            Uint16 tile_index = bg_and_obj_share_same_memory ? map_tile_id : 0x1000 + static_cast<Sint8>(map_tile_id);
+
+            tile_rect.x = (tile_index % horizontal_tiles_count) * 8;
+            tile_rect.y = (tile_index / horizontal_tiles_count) * 8;
+            SDL_RenderCopy(renderer, tiles_texture, &tile_rect, &map_tile_rect);
+        }
+    }
 }

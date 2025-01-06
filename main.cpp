@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
     if (renderer == NULL) {
         std::cerr << "ERROR: Renderer could not be created!  SDL error: " << SDL_GetError() << std::endl;
         SDL_DestroyWindow(window);
@@ -207,6 +207,7 @@ int main(int argc, char* argv[]) {
         SDL_DestroyTexture(font_texture);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
+        return 1;
     }
 
     Uint32 texture_format;
@@ -224,16 +225,44 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    const int VRAM_TEXTURE_WIDTH = 128;
-    const int VRAM_TEXTURE_HEIGHT = 192;
-    SDL_Texture* vram_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, VRAM_TEXTURE_WIDTH, VRAM_TEXTURE_HEIGHT);
-    if (screen_texture == NULL) {
-        std::cerr << "ERROR: VRAM texture could not be created!  SDL error: " << SDL_GetError() << std::endl;
+    const int TILES_TEXTURE_WIDTH = 128;
+    const int TILES_TEXTURE_HEIGHT = 192;
+    SDL_Texture* tiles_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, TILES_TEXTURE_WIDTH, TILES_TEXTURE_HEIGHT);
+    if (tiles_texture == NULL) {
+        std::cerr << "ERROR: Tiles texture could not be created!  SDL error: " << SDL_GetError() << std::endl;
         SDL_FreeFormat(screen_texture_pixel_format);
         SDL_DestroyTexture(screen_texture);
         SDL_DestroyTexture(font_texture);
         SDL_DestroyRenderer(renderer);
         SDL_DestroyWindow(window);
+        return 1;
+    }
+
+    const int TILE_MAP_TEXTURE_WIDTH = 256;
+    const int TILE_MAP_TEXTURE_HEIGHT = 256;
+    SDL_Texture* tile_map_0_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, TILE_MAP_TEXTURE_WIDTH, TILE_MAP_TEXTURE_HEIGHT);
+    if (tile_map_0_texture == NULL) {
+        std::cerr << "ERROR: Tile map 0 texture could not be created!  SDL error: " << SDL_GetError() << std::endl;
+        SDL_DestroyTexture(tiles_texture);
+        SDL_FreeFormat(screen_texture_pixel_format);
+        SDL_DestroyTexture(screen_texture);
+        SDL_DestroyTexture(font_texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        return 1;
+    }
+
+    SDL_Texture* tile_map_1_texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, TILE_MAP_TEXTURE_WIDTH, TILE_MAP_TEXTURE_HEIGHT);
+    if (tile_map_1_texture == NULL) {
+        std::cerr << "ERROR: Tile map 1 texture could not be created!  SDL error: " << SDL_GetError() << std::endl;
+        SDL_DestroyTexture(tile_map_0_texture);
+        SDL_DestroyTexture(tiles_texture);
+        SDL_FreeFormat(screen_texture_pixel_format);
+        SDL_DestroyTexture(screen_texture);
+        SDL_DestroyTexture(font_texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        return 1;
     }
 
     Cartridge cartridge(rom_filename);
@@ -361,16 +390,16 @@ int main(int argc, char* argv[]) {
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, screen_texture, NULL, &ratio_maintained_maximized_texture_rect);
         } else if (view == View::VRAM) {
+            game_boy.render_tiles_to_texture(tiles_texture, TILES_TEXTURE_WIDTH, TILES_TEXTURE_HEIGHT);
+
+            SDL_SetRenderTarget(renderer, tile_map_0_texture);
+            game_boy.render_tile_map(renderer, 0, tiles_texture, TILES_TEXTURE_WIDTH);
+            SDL_SetRenderTarget(renderer, tile_map_1_texture);
+            game_boy.render_tile_map(renderer, 1, tiles_texture, TILES_TEXTURE_WIDTH);
+            SDL_SetRenderTarget(renderer, NULL);
+
             SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);
             SDL_RenderClear(renderer);
-
-            game_boy.render_vram_to_texture(vram_texture, VRAM_TEXTURE_WIDTH, VRAM_TEXTURE_HEIGHT);
-
-            SDL_Rect vram_destination_rect;
-            vram_destination_rect.x = 10;
-            vram_destination_rect.y = 10;
-            vram_destination_rect.w = VRAM_TEXTURE_WIDTH * 3;
-            vram_destination_rect.h = VRAM_TEXTURE_HEIGHT * 3;
 
             Uint32 palette_colors[12];
             game_boy.get_palette_colors(palette_colors);
@@ -391,13 +420,34 @@ int main(int argc, char* argv[]) {
                 }
             }
 
-            SDL_RenderCopy(renderer, vram_texture, NULL, &vram_destination_rect);
+            SDL_Rect tiles_destination_rect;
+            tiles_destination_rect.x = 10;
+            tiles_destination_rect.y = 10;
+            tiles_destination_rect.w = TILES_TEXTURE_WIDTH * 3;
+            tiles_destination_rect.h = TILES_TEXTURE_HEIGHT * 3;
+            SDL_RenderCopy(renderer, tiles_texture, NULL, &tiles_destination_rect);
+
+            SDL_Rect tile_map_0_destination_rect;
+            tile_map_0_destination_rect.x = tiles_destination_rect.x + tiles_destination_rect.w + 20;
+            tile_map_0_destination_rect.y = 10;
+            tile_map_0_destination_rect.w = TILE_MAP_TEXTURE_WIDTH * 2;
+            tile_map_0_destination_rect.h = TILE_MAP_TEXTURE_HEIGHT * 2;
+            SDL_RenderCopy(renderer, tile_map_0_texture, NULL, &tile_map_0_destination_rect);
+
+            SDL_Rect tile_map_1_destination_rect;
+            tile_map_1_destination_rect.x = tile_map_0_destination_rect.x + tile_map_0_destination_rect.w + 20;
+            tile_map_1_destination_rect.y = 10;
+            tile_map_1_destination_rect.w = TILE_MAP_TEXTURE_WIDTH * 2;
+            tile_map_1_destination_rect.h = TILE_MAP_TEXTURE_HEIGHT * 2;
+            SDL_RenderCopy(renderer, tile_map_1_texture, NULL, &tile_map_1_destination_rect);
         }
 
         SDL_RenderPresent(renderer);
     }
 
-    SDL_DestroyTexture(vram_texture);
+    SDL_DestroyTexture(tile_map_1_texture);
+    SDL_DestroyTexture(tile_map_0_texture);
+    SDL_DestroyTexture(tiles_texture);
     SDL_FreeFormat(screen_texture_pixel_format);
     SDL_DestroyTexture(screen_texture);
     SDL_DestroyTexture(font_texture);

@@ -116,12 +116,18 @@ void GameBoy::disassemble(Uint16 start_address, int num_of_instructions, std::ve
 
 // ----------------------------------------------------------------------------
 
-void GameBoy::render_vram_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
-    ppu->render_vram_to_texture(texture, texture_width, texture_height);
+void GameBoy::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
+    ppu->render_tiles_to_texture(texture, texture_width, texture_height);
 }
 
 // ----------------------------------------------------------------------------
 
 void GameBoy::get_palette_colors(Uint32* output) {
     ppu->get_palette_colors(output);
+}
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width) {
+    ppu->render_tile_map(renderer, tile_map_index, tiles_texture, tiles_texture_width);
 }
