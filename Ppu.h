@@ -15,7 +15,7 @@ public:
     Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format);
     ~Ppu();
 
-    void clock();
+    Uint8 clock();
     void lock_screen_texture();
     void unlock_screen_texture();
     bool is_frame_complete();

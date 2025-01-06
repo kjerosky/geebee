@@ -95,7 +95,11 @@ void GameBoy::write_to_bus(Uint16 address, Uint8 value) {
 // ----------------------------------------------------------------------------
 
 void GameBoy::clock() {
-    ppu->clock();
+    Uint8 ppu_interrupts_raised = ppu->clock();
+    if (ppu_interrupts_raised != 0x00) {
+        Uint8 new_if_flag_register_value = bus->cpu_read(0xFF0F) | ppu_interrupts_raised;
+        bus->cpu_write(0xFF0F, new_if_flag_register_value);
+    }
 
     if (cycle_count % 4 == 0) {
         cpu->clock();

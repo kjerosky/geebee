@@ -30,7 +30,9 @@ Ppu::~Ppu() {
 
 // ----------------------------------------------------------------------------
 
-void Ppu::clock() {
+Uint8 Ppu::clock() {
+    Uint8 interrupts_raised = 0x00;
+
     if (scanline >= 0 && scanline < 144) {
         if (scanline_dot >= 0 && scanline_dot < 80) {
             // mode 2 - OAM scan
@@ -60,8 +62,12 @@ void Ppu::clock() {
         if (scanline > 153) {
             scanline = 0;
             frame_complete = true;
+        } else if (scanline == 144) {
+            interrupts_raised |= 0x01;
         }
     }
+
+    return interrupts_raised;
 }
 
 // ----------------------------------------------------------------------------
