@@ -14,6 +14,7 @@ Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_form
   obj_palette_0(0x00),
   obj_palette_1(0x00) {
     std::memset(video_ram, 0x00, VIDEO_RAM_SIZE * sizeof(Uint8));
+    std::memset(oam, 0x00, OAM_SIZE * sizeof(Uint8));
 
     gameboy_pocket_colors[0] = SDL_MapRGB(this->screen_texture_pixel_format, 0xFF, 0xFF, 0xFF);
     gameboy_pocket_colors[1] = SDL_MapRGB(this->screen_texture_pixel_format, 0xAA, 0xAA, 0xAA);
@@ -86,6 +87,8 @@ bool Ppu::is_frame_complete() {
 Uint8 Ppu::cpu_read(Uint16 address) {
     if (address >= 0x8000 && address <= 0x9FFF) {
         return video_ram[address - 0x8000];
+    } else if (address >= 0xFE00 && address <= 0xFE9F) {
+        return oam[address - 0xFE00];
     }
 
     switch (address) {
@@ -106,9 +109,6 @@ Uint8 Ppu::cpu_read(Uint16 address) {
             break;
         case 0xFF45:
             return scanline_compare;
-            break;
-        case 0xFF46:
-            // oam dma source address and start
             break;
         case 0xFF47:
             return bg_palette;
@@ -136,6 +136,9 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
     if (address >= 0x8000 && address <= 0x9FFF) {
         video_ram[address - 0x8000] = value;
         return;
+    } else if (address >= 0xFE00 && address <= 0xFE9F) {
+        oam[address - 0xFE00] = value;
+        return;
     }
 
     switch (address) {
@@ -153,9 +156,6 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
             break;
         case 0xFF45:
             scanline_compare = value;
-            break;
-        case 0xFF46:
-            // oam dma source address and start
             break;
         case 0xFF47:
             bg_palette = value;

@@ -9,7 +9,9 @@ Bus::Bus(Ppu* ppu, Cartridge* cartridge)
 : ppu(ppu),
   cartridge(cartridge),
   interrupt_flag_register(0x00),
-  interrupt_enable_register(0x00) {
+  interrupt_enable_register(0x00),
+  oam_dma_started(false),
+  oam_dma_start_address(0x0000) {
     std::memset(work_ram_bank_0, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(work_ram_bank_1, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(high_ram, 0x00, HIGH_RAM_SIZE * sizeof(Uint8));
@@ -42,7 +44,7 @@ Uint8 Bus::cpu_read(Uint16 address) {
     } else if (address >= 0xD000 && address <= 0xDFFF) {
         read_value = work_ram_bank_1[address - 0xD000];
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // object attribute memory (oam)
+        read_value = ppu->cpu_read(address);
     } else if (address >= 0xFEA0 && address <= 0xFEFF) {
         // not usable (Nintendo says use of this area is prohibited)
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
@@ -75,7 +77,7 @@ void Bus::cpu_write(Uint16 address, Uint8 value) {
     } else if (address >= 0xD000 && address <= 0xDFFF) {
         work_ram_bank_1[address - 0xD000] = value;
     } else if (address >= 0xFE00 && address <= 0xFE9F) {
-        // object attribute memory (oam)
+        ppu->cpu_write(address, value);
     } else if (address >= 0xFEA0 && address <= 0xFEFF) {
         // not usable (Nintendo says use of this area is prohibited)
     } else if (address >= 0xFF00 && address <= 0xFF7F) {
@@ -106,7 +108,22 @@ Uint8 Bus::read_from_io_register(Uint16 address) {
 void Bus::write_to_io_register(Uint16 address, Uint8 value) {
     if (address == 0xFF0F) {
         interrupt_flag_register = value;
+    } else if (address == 0xFF46) {
+        oam_dma_start_address = static_cast<Uint16>(value) << 8;
+        oam_dma_started = true;
     } else if (address >= 0xFF40 && address <= 0xFF6C) {
         ppu->cpu_write(address, value);
     }
+}
+
+// ----------------------------------------------------------------------------
+
+bool Bus::check_and_reset_oam_dma_started(Uint16& output_oam_dma_start_address) {
+    if (oam_dma_started) {
+        output_oam_dma_start_address = oam_dma_start_address;
+        oam_dma_started = false;
+        return true;
+    }
+
+    return false;
 }

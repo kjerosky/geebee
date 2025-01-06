@@ -6,6 +6,7 @@
 #define COLORS_SIZE 4
 #define VIDEO_RAM_SIZE 8192
 #define TILE_DATA_SIZE 6144
+#define OAM_SIZE 160
 
 class Ppu {
 
@@ -30,6 +31,7 @@ private:
     SDL_PixelFormat* screen_texture_pixel_format;
 
     Uint8 video_ram[VIDEO_RAM_SIZE];
+    Uint8 oam[OAM_SIZE];
 
     int scanline;
     int scanline_dot;

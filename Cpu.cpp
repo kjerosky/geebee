@@ -677,6 +677,21 @@ void Cpu::clock() {
             return;
         }
 
+        if (!is_oam_dma_transfer_in_progress) {
+            is_oam_dma_transfer_in_progress = bus->check_and_reset_oam_dma_started(oam_dma_source_address);
+        }
+
+        if (is_oam_dma_transfer_in_progress) {
+            Uint8 current_oam_value = bus->cpu_read(oam_dma_source_address);
+            Uint16 current_oam_address = 0xFE00 | (oam_dma_source_address & 0x00FF);
+            bus->cpu_write(current_oam_address, current_oam_value);
+
+            oam_dma_source_address++;
+            if ((oam_dma_source_address & 0x00FF) == 0x00A0) {
+                is_oam_dma_transfer_in_progress = false;
+            }
+        }
+
         Uint8 opcode_byte = bus->cpu_read(pc++);
 
         Instruction opcode;
@@ -732,6 +747,9 @@ void Cpu::reset() {
 
     instructions_remaining_to_enable_ime = 0;
     is_halted = false;
+
+    is_oam_dma_transfer_in_progress = false;
+    oam_dma_source_address = 0x0000;
 }
 
 // ----------------------------------------------------------------------------

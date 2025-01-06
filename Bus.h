@@ -19,6 +19,8 @@ public:
     Uint8 cpu_read(Uint16 address);
     void cpu_write(Uint16 address, Uint8 value);
 
+    bool check_and_reset_oam_dma_started(Uint16& output_oam_dma_start_address);
+
 private:
 
     Ppu* ppu;
@@ -30,6 +32,9 @@ private:
 
     Uint8 interrupt_flag_register;
     Uint8 interrupt_enable_register;
+
+    bool oam_dma_started;
+    Uint16 oam_dma_start_address;
 
     Uint8 read_from_io_register(Uint16 address);
     void write_to_io_register(Uint16 address, Uint8 value);
