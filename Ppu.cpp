@@ -1,18 +1,19 @@
 #include "Ppu.h"
 
 #include <SDL2/SDL.h>
-#include <cstdlib>
 #include <string>
 
 Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format)
 : screen_texture(screen_texture),
   screen_texture_pixel_format(screen_texture_pixel_format),
+  pixel_pipeline(video_ram, oam, gameboy_pocket_colors),
   scanline(0),
   scanline_dot(0),
   frame_complete(false),
   bg_palette(0x00),
   obj_palette_0(0x00),
   obj_palette_1(0x00) {
+
     std::memset(video_ram, 0x00, VIDEO_RAM_SIZE * sizeof(Uint8));
     std::memset(oam, 0x00, OAM_SIZE * sizeof(Uint8));
 
@@ -43,9 +44,10 @@ Uint8 Ppu::clock() {
             int screen_pixel_y = scanline;
             int screen_pixel_index = screen_pixel_y * (screen_pixels_row_length / sizeof(Uint32)) + screen_pixel_x;
 
-            // output garbage for now
-            int random_color_index = std::rand() % COLORS_SIZE;
-            screen_pixels[screen_pixel_index] = gameboy_pocket_colors[random_color_index];
+            // For now, we'll suppose that a dot is produced for each clock.
+            // In reality, this is way more complicated as mode 3's time is
+            // variable, though modes 3 and 0 together have a constant time.
+            screen_pixels[screen_pixel_index] = pixel_pipeline.get_next_pixel_color(bg_palette, obj_palette_0, obj_palette_1);
         } else {
             // mode 0 - horizontal blank
         }

@@ -3,6 +3,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "PixelPipeline.h"
+
 #define COLORS_SIZE 4
 #define VIDEO_RAM_SIZE 8192
 #define TILE_DATA_SIZE 6144
@@ -30,6 +32,8 @@ private:
 
     SDL_Texture* screen_texture;
     SDL_PixelFormat* screen_texture_pixel_format;
+
+    PixelPipeline pixel_pipeline;
 
     Uint8 video_ram[VIDEO_RAM_SIZE];
     Uint8 oam[OAM_SIZE];
