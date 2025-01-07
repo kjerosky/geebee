@@ -128,6 +128,6 @@ void GameBoy::get_palette_colors(Uint32* output) {
 
 // ----------------------------------------------------------------------------
 
-void GameBoy::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width) {
-    ppu->render_tile_map(renderer, tile_map_index, tiles_texture, tiles_texture_width);
+void GameBoy::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width, bool show_objects) {
+    ppu->render_tile_map(renderer, tile_map_index, tiles_texture, tiles_texture_width, show_objects);
 }

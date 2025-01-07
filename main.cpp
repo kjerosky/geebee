@@ -281,6 +281,8 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::string> disassembled_lines;
 
+    bool show_ppu_objects = false;
+
     bool is_main_program_running = true;
     while (is_main_program_running) {
         SDL_Event event;
@@ -306,6 +308,8 @@ int main(int argc, char* argv[]) {
                     ram_page = ram_page + 0x0100;
                 } else if (event.key.keysym.sym == SDLK_MINUS) {
                     ram_page = ram_page - 0x0100;
+                } else if (event.key.keysym.sym == SDLK_o) {
+                    show_ppu_objects = !show_ppu_objects;
                 } else if (event.key.keysym.sym == SDLK_1) {
                     game_boy.generate_interrupt(0);
                 } else if (event.key.keysym.sym == SDLK_2) {
@@ -393,9 +397,9 @@ int main(int argc, char* argv[]) {
             game_boy.render_tiles_to_texture(tiles_texture, TILES_TEXTURE_WIDTH, TILES_TEXTURE_HEIGHT);
 
             SDL_SetRenderTarget(renderer, tile_map_0_texture);
-            game_boy.render_tile_map(renderer, 0, tiles_texture, TILES_TEXTURE_WIDTH);
+            game_boy.render_tile_map(renderer, 0, tiles_texture, TILES_TEXTURE_WIDTH, show_ppu_objects);
             SDL_SetRenderTarget(renderer, tile_map_1_texture);
-            game_boy.render_tile_map(renderer, 1, tiles_texture, TILES_TEXTURE_WIDTH);
+            game_boy.render_tile_map(renderer, 1, tiles_texture, TILES_TEXTURE_WIDTH, false);
             SDL_SetRenderTarget(renderer, NULL);
 
             SDL_SetRenderDrawColor(renderer, 0x00, 0x44, 0xCC, 0x00);

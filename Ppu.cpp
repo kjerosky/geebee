@@ -237,7 +237,7 @@ void Ppu::get_palette_colors(Uint32* output) {
 
 // ----------------------------------------------------------------------------
 
-void Ppu::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width) {
+void Ppu::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width, bool show_objects) {
     int horizontal_tiles_count = tiles_texture_width / 8;
 
     SDL_Rect tile_rect;
@@ -269,5 +269,27 @@ void Ppu::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Textur
             tile_rect.y = (tile_index / horizontal_tiles_count) * 8;
             SDL_RenderCopy(renderer, tiles_texture, &tile_rect, &map_tile_rect);
         }
+    }
+
+    if (!show_objects) {
+        return;
+    }
+
+    // temporary bad sprite display for debugging
+    for (int i = 0; i < 160; i += 4) {
+        int obj_y = (int)oam[i] - 16;
+        int obj_x = (int)oam[i + 1] - 8;
+        if (obj_x == 0 || obj_y == 0) {
+            continue;
+        }
+
+        int obj_tile_index = oam[i + 2];
+        tile_rect.x = (obj_tile_index % horizontal_tiles_count) * 8;
+        tile_rect.y = (obj_tile_index / horizontal_tiles_count) * 8;
+
+        map_tile_rect.x = obj_x;
+        map_tile_rect.y = obj_y;
+
+        SDL_RenderCopy(renderer, tiles_texture, &tile_rect, &map_tile_rect);
     }
 }
