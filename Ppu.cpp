@@ -38,7 +38,6 @@ Uint8 Ppu::clock() {
     if (scanline >= 0 && scanline < 144) {
         if (scanline_dot >= 0 && scanline_dot < 80) {
             // mode 2 - OAM scan
-
         } else if (screen_pixel_x >= 0 && screen_pixel_x < 160) {
             // mode 3 - drawing pixels
 

@@ -25,9 +25,6 @@ public:
 
 private:
 
-    Uint8* video_ram;
-    Uint8* oam;
-    Uint32* system_colors;
     Uint8* bg_palette;
     Uint8* obj_palette_0;
     Uint8* obj_palette_1;

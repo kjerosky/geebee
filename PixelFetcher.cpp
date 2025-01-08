@@ -15,9 +15,11 @@ PixelFetcher::~PixelFetcher() {
 
 // ----------------------------------------------------------------------------
 
-void PixelFetcher::reset(Uint16 start_tile_map_address, Uint8 y_offset) {
-    tile_map_address = start_tile_map_address;
+void PixelFetcher::reset(Uint8 leftmost_viewport_tile_column, Uint8 leftmost_viewport_tile_row, Uint8 y_offset) {
+    tile_column = leftmost_viewport_tile_column;
+    tile_row = leftmost_viewport_tile_row;
     this->y_offset = y_offset;
+
     state = FETCHING_TILE_ID;
 }
 
@@ -26,8 +28,13 @@ void PixelFetcher::reset(Uint16 start_tile_map_address, Uint8 y_offset) {
 void PixelFetcher::clock(Uint8 lcd_control) {
     bool bg_and_obj_share_same_memory = ((lcd_control >> 4) & 0x01) == 0x01;
 
+    Uint16 tile_map_offset = tile_row * 32 + tile_column;
+    Uint16 base_bg_tile_map_address = (((lcd_control >> 3) & 0x01) == 0x00) ? 0x1800 : 0x1C00;
+
     switch (state) {
         case FETCHING_TILE_ID:
+            tile_map_address = base_bg_tile_map_address + tile_map_offset;
+
             tile_id = video_ram[tile_map_address++];
             state = FETCHING_TILE_DATA_LSB;
             break;
@@ -40,6 +47,9 @@ void PixelFetcher::clock(Uint8 lcd_control) {
 
         case FETCHING_TILE_DATA_MSB:
             tile_data_msb = video_ram[tile_address];
+
+            tile_column = (tile_column + 1) % 32;
+
             state = PIXEL_IS_READY;
             break;
 

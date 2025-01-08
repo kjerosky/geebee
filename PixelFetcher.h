@@ -23,7 +23,7 @@ public:
     PixelFetcher(Uint8* video_ram);
     ~PixelFetcher();
 
-    void reset(Uint16 start_address, Uint8 y_offset);
+    void reset(Uint8 leftmost_viewport_tile_column, Uint8 leftmost_viewport_tile_row, Uint8 y_offset);
     void clock(Uint8 lcd_control);
     bool is_ready_with_pixel();
     void get_pixels_and_continue(PixelInfo output_pixels[8]);
@@ -33,6 +33,8 @@ private:
     Uint8* video_ram;
 
     PixelFetcherState state;
+    Uint8 tile_column;
+    Uint8 tile_row;
     Uint16 tile_map_address;
     Uint8 tile_id;
     Uint8 y_offset;

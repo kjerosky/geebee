@@ -1,10 +1,7 @@
 #include "PixelPipeline.h"
 
 PixelPipeline::PixelPipeline(Uint8* video_ram, Uint8* oam, Uint32* system_colors, Uint8* bg_palette, Uint8* obj_palette_0, Uint8* obj_palette_1, Uint8* lcd_control)
-: video_ram(video_ram),
-  oam(oam),
-  system_colors(system_colors),
-  bg_palette(bg_palette),
+: bg_palette(bg_palette),
   obj_palette_0(obj_palette_0),
   obj_palette_1(obj_palette_1),
   lcd_control(lcd_control),
@@ -34,15 +31,14 @@ void PixelPipeline::reset(Uint8 screen_x, Uint8 screen_y, Uint8 viewport_x, Uint
 
     Uint16 top_left_x = viewport_x + screen_x;
     Uint16 top_left_y = viewport_y + screen_y;
-    Uint16 tile_column = top_left_x / 8;
-    Uint16 tile_row = top_left_y / 8;
-    Uint16 tile_map_offset = tile_row * 32 + tile_column;
-    Uint8 y_offset = top_left_y % 8;
-
-    Uint16 base_bg_tile_map_address = (((*lcd_control >> 3) & 0x01) == 0x00) ? 0x1800 : 0x1C00;
-    pixel_fetcher.reset(base_bg_tile_map_address + tile_map_offset, y_offset);
 
     pixels_to_discard = top_left_x % 8;
+    Uint8 y_offset = top_left_y % 8;
+
+    Uint8 leftmost_viewport_tile_column = (top_left_x / 8) % 32;
+    Uint8 leftmost_viewport_tile_row = (top_left_y / 8) % 32;
+
+    pixel_fetcher.reset(leftmost_viewport_tile_column, leftmost_viewport_tile_row, y_offset);
 
     state = INITIAL_FULL_FETCH;
 }
