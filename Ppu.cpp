@@ -2,14 +2,16 @@
 
 #include <SDL2/SDL.h>
 #include <string>
+#include <iostream>//todo
 
 Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format)
 : screen_texture(screen_texture),
   screen_texture_pixel_format(screen_texture_pixel_format),
-  pixel_pipeline(video_ram, oam, gameboy_pocket_colors),
+  pixel_pipeline(video_ram, oam, gameboy_pocket_colors, &bg_palette, &obj_palette_0, &obj_palette_1, &lcd_control),
   scanline(0),
   scanline_dot(0),
   frame_complete(false),
+  screen_pixel_x(-1),
   bg_palette(0x00),
   obj_palette_0(0x00),
   obj_palette_1(0x00) {
@@ -37,17 +39,20 @@ Uint8 Ppu::clock() {
     if (scanline >= 0 && scanline < 144) {
         if (scanline_dot >= 0 && scanline_dot < 80) {
             // mode 2 - OAM scan
-        } else if (scanline_dot >= 80 && scanline_dot < 240) {
+
+        } else if (screen_pixel_x >= 0 && screen_pixel_x < 160) {
             // mode 3 - drawing pixels
 
-            int screen_pixel_x = scanline_dot - 80;
             int screen_pixel_y = scanline;
             int screen_pixel_index = screen_pixel_y * (screen_pixels_row_length / sizeof(Uint32)) + screen_pixel_x;
 
-            // For now, we'll suppose that a dot is produced for each clock.
-            // In reality, this is way more complicated as mode 3's time is
-            // variable, though modes 3 and 0 together have a constant time.
-            screen_pixels[screen_pixel_index] = pixel_pipeline.get_next_pixel_color(bg_palette, obj_palette_0, obj_palette_1);
+            pixel_pipeline.clock();
+            if (pixel_pipeline.is_ready_with_next_pixel()) {
+                Uint32 next_pixel_color_index = pixel_pipeline.get_next_pixel_color_index();
+                screen_pixels[screen_pixel_index] = gameboy_pocket_colors[next_pixel_color_index];
+
+                screen_pixel_x++;
+            }
         } else {
             // mode 0 - horizontal blank
         }
@@ -57,7 +62,10 @@ Uint8 Ppu::clock() {
 
     frame_complete = false;
     scanline_dot++;
-    if (scanline_dot >= 456) {
+    if (scanline_dot == 80) {
+        screen_pixel_x = 0;
+        pixel_pipeline.reset(screen_pixel_x, scanline, viewport_x, viewport_y);
+    } else if (scanline_dot >= 456) {
         scanline_dot = 0;
 
         scanline++;

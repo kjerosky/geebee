@@ -44,6 +44,7 @@ private:
 
     Uint32* screen_pixels;
     int screen_pixels_row_length;
+    int screen_pixel_x;
 
     Uint32 gameboy_pocket_colors[COLORS_SIZE];
     Uint8 bg_palette;
