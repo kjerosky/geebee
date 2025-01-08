@@ -1,5 +1,4 @@
 #include "PixelFetcher.h"
-#include <iostream>//todo
 
 PixelFetcher::PixelFetcher(Uint8* video_ram)
 : video_ram(video_ram),

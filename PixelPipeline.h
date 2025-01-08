@@ -6,6 +6,11 @@
 
 #include "PixelFetcher.h"
 
+enum PixelPipelineState {
+    INITIAL_FULL_FETCH,
+    STANDARD_OPERATION,
+};
+
 class PixelPipeline {
 
 public:
@@ -16,7 +21,7 @@ public:
     void reset(Uint8 screen_x, Uint8 screen_y, Uint8 viewport_x, Uint8 viewport_y);
     void clock();
     bool is_ready_with_next_pixel();
-    Uint32 get_next_pixel_color_index();
+    Uint8 get_next_pixel_color_index();
 
 private:
 
@@ -28,12 +33,13 @@ private:
     Uint8* obj_palette_1;
     Uint8* lcd_control;
 
+    PixelPipelineState state;
+    Uint8 pixels_to_discard;
     std::queue<PixelInfo> bg_fifo;
     std::queue<PixelInfo> obj_fifo;
     PixelFetcher pixel_fetcher;
 
-    PixelInfo get_next_bg_pixel();
-    PixelInfo get_next_obj_pixel();
+    int clock_cycles;
 };
 
 #endif

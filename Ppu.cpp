@@ -2,7 +2,6 @@
 
 #include <SDL2/SDL.h>
 #include <string>
-#include <iostream>//todo
 
 Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format)
 : screen_texture(screen_texture),
@@ -48,7 +47,7 @@ Uint8 Ppu::clock() {
 
             pixel_pipeline.clock();
             if (pixel_pipeline.is_ready_with_next_pixel()) {
-                Uint32 next_pixel_color_index = pixel_pipeline.get_next_pixel_color_index();
+                Uint8 next_pixel_color_index = pixel_pipeline.get_next_pixel_color_index();
                 screen_pixels[screen_pixel_index] = gameboy_pocket_colors[next_pixel_color_index];
 
                 screen_pixel_x++;

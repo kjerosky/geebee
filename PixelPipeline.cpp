@@ -1,5 +1,4 @@
 #include "PixelPipeline.h"
-#include <iostream>//todo
 
 PixelPipeline::PixelPipeline(Uint8* video_ram, Uint8* oam, Uint32* system_colors, Uint8* bg_palette, Uint8* obj_palette_0, Uint8* obj_palette_1, Uint8* lcd_control)
 : video_ram(video_ram),
@@ -23,6 +22,8 @@ PixelPipeline::~PixelPipeline() {
 // ----------------------------------------------------------------------------
 
 void PixelPipeline::reset(Uint8 screen_x, Uint8 screen_y, Uint8 viewport_x, Uint8 viewport_y) {
+    clock_cycles = 0;
+
     while (!bg_fifo.empty()) {
         bg_fifo.pop();
     }
@@ -40,60 +41,51 @@ void PixelPipeline::reset(Uint8 screen_x, Uint8 screen_y, Uint8 viewport_x, Uint
 
     Uint16 base_bg_tile_map_address = (((*lcd_control >> 3) & 0x01) == 0x00) ? 0x1800 : 0x1C00;
     pixel_fetcher.reset(base_bg_tile_map_address + tile_map_offset, y_offset);
+
+    pixels_to_discard = top_left_x % 8;
+
+    state = INITIAL_FULL_FETCH;
 }
 
 // ----------------------------------------------------------------------------
 
 void PixelPipeline::clock() {
-    //todo
-    while (!pixel_fetcher.is_ready_with_pixel()) {
-        pixel_fetcher.clock(*lcd_control);
+    if (state == INITIAL_FULL_FETCH && bg_fifo.size() == 16) {
+        for (int i = 0; i < pixels_to_discard; i++) {
+            bg_fifo.pop();
+        }
+
+        state = STANDARD_OPERATION;
     }
 
-    PixelInfo next_pixels[8];
-    pixel_fetcher.get_pixels_and_continue(next_pixels);
-    for (int i = 0; i < 8; i++) {
-        bg_fifo.push(next_pixels[i]);
+    //todo - only bg for now
+    if (pixel_fetcher.is_ready_with_pixel()) {
+        PixelInfo next_pixels[8];
+        pixel_fetcher.get_pixels_and_continue(next_pixels);
+        for (int i = 0; i < 8; i++) {
+            bg_fifo.push(next_pixels[i]);
+        }
+    }
+
+    clock_cycles++;
+    if (clock_cycles % 2 == 0) {
+        pixel_fetcher.clock(*lcd_control);
     }
 }
 
 // ----------------------------------------------------------------------------
 
 bool PixelPipeline::is_ready_with_next_pixel() {
-    //todo
-    return true;
+    return state == STANDARD_OPERATION && bg_fifo.size() > 8;
 }
 
 // ----------------------------------------------------------------------------
 
-Uint32 PixelPipeline::get_next_pixel_color_index() {
-    //todo
-    Uint32 next_pixel_color_index = bg_fifo.front().color_index;
+Uint8 PixelPipeline::get_next_pixel_color_index() {
+    //todo - only bg for now
+    Uint8 next_pixel_color_index = bg_fifo.front().color_index;
     bg_fifo.pop();
 
     int mapped_bg_color_index = (*bg_palette >> (next_pixel_color_index * 2)) & 0x03;
     return mapped_bg_color_index;
-}
-
-// ----------------------------------------------------------------------------
-
-PixelInfo PixelPipeline::get_next_bg_pixel() {
-    if (bg_fifo.empty()) {
-        //todo
-    }
-
-    if (bg_fifo.size() <= 8) {
-        //todo
-    }
-
-    PixelInfo next_bg_pixel = bg_fifo.front();
-    bg_fifo.pop();
-    return next_bg_pixel;
-}
-
-// ----------------------------------------------------------------------------
-
-PixelInfo PixelPipeline::get_next_obj_pixel() {
-    //todo
-    return PixelInfo();
 }
