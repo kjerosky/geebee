@@ -6,7 +6,8 @@
 Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format)
 : screen_texture(screen_texture),
   screen_texture_pixel_format(screen_texture_pixel_format),
-  pixel_pipeline(video_ram, oam, gameboy_pocket_colors, &bg_palette, &obj_palette_0, &obj_palette_1, &lcd_control),
+  pixel_pipeline(video_ram, gameboy_pocket_colors, &bg_palette, &obj_palette_0, &obj_palette_1, &lcd_control),
+  visible_obj_indices(10),
   scanline(0),
   scanline_dot(0),
   frame_complete(false),
@@ -38,11 +39,41 @@ Uint8 Ppu::clock() {
     if (scanline >= 0 && scanline < 144) {
         if (scanline_dot >= 0 && scanline_dot < 80) {
             // mode 2 - OAM scan
+
+            // For now, perform visible object search all at once at the start
+            // of the scanline. Maybe move to cycle accuracy later?
+            if (scanline_dot == 0) {
+                Uint8 obj_height = ((lcd_control >> 2) & 0x01) == 0x00 ? 8 : 16;
+
+                visible_obj_indices.clear();
+                for (int i = 0; i < 40 && visible_obj_indices.size() < 10; i++) {
+                    Uint8 obj_y = oam[i * 4];
+                    if (obj_y == 0 || obj_y >= 160) {
+                        continue;
+                    }
+
+                    Uint8 obj_lower_screen_y = obj_y - 16;
+                    Uint8 obj_upper_screen_y = obj_y - 16 + obj_height;
+                    if (scanline >= obj_lower_screen_y && scanline < obj_upper_screen_y) {
+                        visible_obj_indices.push_back(i);
+                    }
+                }
+            }
         } else if (screen_pixel_x >= 0 && screen_pixel_x < 160) {
             // mode 3 - drawing pixels
 
             int screen_pixel_y = scanline;
             int screen_pixel_index = screen_pixel_y * (screen_pixels_row_length / sizeof(Uint32)) + screen_pixel_x;
+
+            for (int i = 0; i < visible_obj_indices.size(); i++) {
+                if (oam[visible_obj_indices[i] * 4 + 1] - 8 == screen_pixel_x) {
+                    Uint8 obj_tile_id = oam[visible_obj_indices[i] * 4 + 2];
+                    Uint8 obj_attributes = oam[visible_obj_indices[i] * 4 + 3];
+                    Uint8 obj_y_offset = scanline - (oam[visible_obj_indices[i] * 4] - 16);
+
+                    pixel_pipeline.load_obj_pixels(obj_tile_id, obj_attributes, obj_y_offset);
+                }
+            }
 
             pixel_pipeline.clock();
             if (pixel_pipeline.is_ready_with_next_pixel()) {

@@ -68,13 +68,13 @@ bool PixelFetcher::is_ready_with_pixel() {
 // ----------------------------------------------------------------------------
 
 void PixelFetcher::get_pixels_and_continue(PixelInfo output_pixels[8]) {
-    //todo
     for (int i = 0; i < 8; i++) {
         int color_index = (((tile_data_msb >> (7 - i)) & 0x01) ? 0x02 : 0x00) | ((tile_data_lsb >> (7 - i)) & 0x01);
-
         output_pixels[i].color_index = color_index;
+
+        // Background pixels don't care about this information.
         output_pixels[i].use_obj_1_palette = false;
-        output_pixels[i].background_priority = false;
+        output_pixels[i].bg_has_priority = false;
     }
 
     state = FETCHING_TILE_ID;

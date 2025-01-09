@@ -2,6 +2,7 @@
 #define PPU_H
 
 #include <SDL2/SDL.h>
+#include <vector>
 
 #include "PixelPipeline.h"
 
@@ -34,6 +35,7 @@ private:
     SDL_PixelFormat* screen_texture_pixel_format;
 
     PixelPipeline pixel_pipeline;
+    std::vector<Uint8> visible_obj_indices;
 
     Uint8 video_ram[VIDEO_RAM_SIZE];
     Uint8 oam[OAM_SIZE];
