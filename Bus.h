@@ -36,8 +36,12 @@ private:
     bool oam_dma_started;
     Uint16 oam_dma_start_address;
 
+    Uint8 joypad_register;
+
     Uint8 read_from_io_register(Uint16 address);
     void write_to_io_register(Uint16 address, Uint8 value);
+
+    void refresh_joypad_register(Uint8 input_byte);
 };
 
 #endif

@@ -11,7 +11,8 @@ Bus::Bus(Ppu* ppu, Cartridge* cartridge)
   interrupt_flag_register(0x00),
   interrupt_enable_register(0x00),
   oam_dma_started(false),
-  oam_dma_start_address(0x0000) {
+  oam_dma_start_address(0x0000),
+  joypad_register(0x00) {
     std::memset(work_ram_bank_0, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(work_ram_bank_1, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(high_ram, 0x00, HIGH_RAM_SIZE * sizeof(Uint8));
@@ -94,7 +95,9 @@ void Bus::cpu_write(Uint16 address, Uint8 value) {
 Uint8 Bus::read_from_io_register(Uint16 address) {
     Uint8 read_value = 0xFF;
 
-    if (address == 0xFF0F) {
+    if (address == 0xFF00) {
+        read_value = joypad_register;
+    } else if (address == 0xFF0F) {
         read_value = interrupt_flag_register;
     } else if (address >= 0xFF40 && address <= 0xFF6C) {
         read_value = ppu->cpu_read(address);
@@ -106,7 +109,9 @@ Uint8 Bus::read_from_io_register(Uint16 address) {
 // ----------------------------------------------------------------------------
 
 void Bus::write_to_io_register(Uint16 address, Uint8 value) {
-    if (address == 0xFF0F) {
+    if (address == 0xFF00) {
+        refresh_joypad_register(value);
+    } else if (address == 0xFF0F) {
         interrupt_flag_register = value;
     } else if (address == 0xFF46) {
         oam_dma_start_address = static_cast<Uint16>(value) << 8;
@@ -126,4 +131,49 @@ bool Bus::check_and_reset_oam_dma_started(Uint16& output_oam_dma_start_address) 
     }
 
     return false;
+}
+
+// ----------------------------------------------------------------------------
+
+void Bus::refresh_joypad_register(Uint8 input_byte) {
+    // NOTE: Keep in mind that the joypad register is active low, so the
+    //       associated button's bit is cleared when the button is pressed.
+    //       This also applies to bits 4 and 5 for selecting either buttons
+    //       or directions.
+
+    joypad_register = input_byte | 0x0F;
+
+    const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
+
+    switch (input_byte & 0x30) {
+        case 0x20:
+            if (keyboard_state[SDL_SCANCODE_S]) {
+                joypad_register &= ~0x08;
+            }
+            if (keyboard_state[SDL_SCANCODE_W]) {
+                joypad_register &= ~0x04;
+            }
+            if (keyboard_state[SDL_SCANCODE_A]) {
+                joypad_register &= ~0x02;
+            }
+            if (keyboard_state[SDL_SCANCODE_D]) {
+                joypad_register &= ~0x01;
+            }
+            break;
+
+        case 0x10:
+            if (keyboard_state[SDL_SCANCODE_I]) {
+                joypad_register &= ~0x08;
+            }
+            if (keyboard_state[SDL_SCANCODE_U]) {
+                joypad_register &= ~0x04;
+            }
+            if (keyboard_state[SDL_SCANCODE_J]) {
+                joypad_register &= ~0x02;
+            }
+            if (keyboard_state[SDL_SCANCODE_K]) {
+                joypad_register &= ~0x01;
+            }
+            break;
+    }
 }
