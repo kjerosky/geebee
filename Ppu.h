@@ -43,6 +43,7 @@ private:
     int scanline;
     int scanline_dot;
     bool frame_complete;
+    bool just_entering_mode_0;
 
     Uint32* screen_pixels;
     int screen_pixels_row_length;

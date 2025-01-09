@@ -11,6 +11,7 @@ Ppu::Ppu(SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_form
   scanline(0),
   scanline_dot(0),
   frame_complete(false),
+  just_entering_mode_0(false),
   screen_pixel_x(-1),
   bg_palette(0x00),
   obj_palette_0(0x00),
@@ -36,9 +37,24 @@ Ppu::~Ppu() {
 Uint8 Ppu::clock() {
     Uint8 interrupts_raised = 0x00;
 
+    if (scanline == scanline_compare) {
+        lcd_status |= 0x04;
+
+        if (scanline_dot == 0 && (lcd_status & 0x40) != 0x00) {
+            interrupts_raised |= 0x02;
+        }
+    } else {
+        lcd_status &= 0xFB;
+    }
+
     if (scanline >= 0 && scanline < 144) {
         if (scanline_dot >= 0 && scanline_dot < 80) {
             // mode 2 - OAM scan
+            lcd_status = (lcd_status & 0xFC) | 0x02;
+
+            if (scanline_dot == 0 && (lcd_status & 0x20) != 0x00) {
+                interrupts_raised |= 0x02;
+            }
 
             // For now, perform visible object search all at once at the start
             // of the scanline. Maybe move to cycle accuracy later?
@@ -61,6 +77,7 @@ Uint8 Ppu::clock() {
             }
         } else if (screen_pixel_x >= 0 && screen_pixel_x < 160) {
             // mode 3 - drawing pixels
+            lcd_status = (lcd_status & 0xFC) | 0x03;
 
             int screen_pixel_y = scanline;
             int screen_pixel_index = screen_pixel_y * (screen_pixels_row_length / sizeof(Uint32)) + screen_pixel_x;
@@ -81,12 +98,33 @@ Uint8 Ppu::clock() {
                 screen_pixels[screen_pixel_index] = gameboy_pocket_colors[next_pixel_color_index];
 
                 screen_pixel_x++;
+                if (screen_pixel_x == 160) {
+                    just_entering_mode_0 = true;
+                }
             }
         } else {
             // mode 0 - horizontal blank
+            lcd_status = lcd_status & 0xFC;
+
+            if (just_entering_mode_0) {
+                if ((lcd_status & 0x08) != 0x00) {
+                    interrupts_raised |= 0x02;
+                }
+
+                just_entering_mode_0 = false;
+            }
         }
     } else {
         // mode 1 - vertical blank
+        lcd_status = (lcd_status & 0xFC) | 0x01;
+
+        if (scanline == 144 && scanline_dot == 0) {
+            interrupts_raised |= 0x01;
+
+            if ((lcd_status & 0x08) != 0x00) {
+                interrupts_raised |= 0x02;
+            }
+        }
     }
 
     frame_complete = false;
@@ -101,8 +139,6 @@ Uint8 Ppu::clock() {
         if (scanline > 153) {
             scanline = 0;
             frame_complete = true;
-        } else if (scanline == 144) {
-            interrupts_raised |= 0x01;
         }
     }
 
