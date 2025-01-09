@@ -36,7 +36,7 @@ private:
     Bus* bus;
     Ppu* ppu;
 
-    int cycle_count;
+    Uint8 cycle_count;
 
     void clock();
 };

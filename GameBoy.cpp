@@ -105,7 +105,10 @@ void GameBoy::clock() {
         cpu->clock();
     }
 
-    cycle_count = (cycle_count + 1) % 4;
+    cycle_count++;
+    if (cycle_count == 0) {
+        bus->increment_div_register();
+    }
 }
 
 // ----------------------------------------------------------------------------

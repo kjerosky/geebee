@@ -21,6 +21,8 @@ public:
 
     bool check_and_reset_oam_dma_started(Uint16& output_oam_dma_start_address);
 
+    void increment_div_register();
+
 private:
 
     Ppu* ppu;
@@ -37,6 +39,7 @@ private:
     Uint16 oam_dma_start_address;
 
     Uint8 joypad_register;
+    Uint8 div_register;
 
     Uint8 read_from_io_register(Uint16 address);
     void write_to_io_register(Uint16 address, Uint8 value);

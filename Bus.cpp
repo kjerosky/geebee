@@ -97,6 +97,8 @@ Uint8 Bus::read_from_io_register(Uint16 address) {
 
     if (address == 0xFF00) {
         read_value = joypad_register;
+    } else if (address == 0xFF04) {
+        read_value = div_register;
     } else if (address == 0xFF0F) {
         read_value = interrupt_flag_register;
     } else if (address >= 0xFF40 && address <= 0xFF6C) {
@@ -111,6 +113,8 @@ Uint8 Bus::read_from_io_register(Uint16 address) {
 void Bus::write_to_io_register(Uint16 address, Uint8 value) {
     if (address == 0xFF00) {
         refresh_joypad_register(value);
+    } else if (address == 0xFF04) {
+        div_register = 0x00;
     } else if (address == 0xFF0F) {
         interrupt_flag_register = value;
     } else if (address == 0xFF46) {
@@ -176,4 +180,10 @@ void Bus::refresh_joypad_register(Uint8 input_byte) {
             }
             break;
     }
+}
+
+// ----------------------------------------------------------------------------
+
+void Bus::increment_div_register() {
+    div_register++;
 }
