@@ -40,7 +40,7 @@ void PixelFetcher::clock(Uint8 lcd_control) {
             break;
 
         case FETCHING_TILE_DATA_LSB:
-            tile_address = (bg_and_obj_share_same_memory ? tile_id : 0x1000 + static_cast<Sint8>(tile_id)) * 16 + y_offset * 2;
+            tile_address = (bg_and_obj_share_same_memory ? tile_id : 0x100 + static_cast<Sint8>(tile_id)) * 16 + y_offset * 2;
             tile_data_lsb = video_ram[tile_address++];
             state = FETCHING_TILE_DATA_MSB;
             break;

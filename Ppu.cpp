@@ -338,7 +338,7 @@ void Ppu::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Textur
             int tile_map_offset = map_tile_y * 32 + map_tile_x;
             Uint8 map_tile_id = video_ram[base_tile_map_address + tile_map_offset];
 
-            Uint16 tile_index = bg_and_obj_share_same_memory ? map_tile_id : 0x1000 + static_cast<Sint8>(map_tile_id);
+            Uint16 tile_index = bg_and_obj_share_same_memory ? map_tile_id : 0x100 + static_cast<Sint8>(map_tile_id);
 
             tile_rect.x = (tile_index % horizontal_tiles_count) * 8;
             tile_rect.y = (tile_index / horizontal_tiles_count) * 8;
@@ -367,4 +367,10 @@ void Ppu::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Textur
 
         SDL_RenderCopy(renderer, tiles_texture, &tile_rect, &map_tile_rect);
     }
+}
+
+// ----------------------------------------------------------------------------
+
+Uint8* Ppu::get_oam() {
+    return oam;
 }

@@ -81,20 +81,21 @@ Uint8 PixelPipeline::get_next_pixel_color_index() {
     Uint8 next_pixel_color_index = bg_fifo.front().color_index;
     bg_fifo.pop();
 
-    int mapped_bg_color_index = (*bg_palette >> (next_pixel_color_index * 2)) & 0x03;
+    int next_pixel_mapped_color_index = (*bg_palette >> (next_pixel_color_index * 2)) & 0x03;
 
     if (!obj_fifo.empty()) {
         PixelInfo obj_pixel = obj_fifo.front();
         obj_fifo.pop();
 
-        if (!obj_pixel.bg_has_priority || next_pixel_color_index == 0x00) {
+        if ((obj_pixel.bg_has_priority && next_pixel_color_index == 0 && obj_pixel.color_index != 0) ||
+            (!obj_pixel.bg_has_priority && obj_pixel.color_index != 0)) {
             next_pixel_color_index = obj_pixel.color_index;
             Uint8 palette = obj_pixel.use_obj_1_palette ? *obj_palette_1 : *obj_palette_0;
-            mapped_bg_color_index = (palette >> (next_pixel_color_index * 2)) & 0x03;
+            next_pixel_mapped_color_index = (palette >> (next_pixel_color_index * 2)) & 0x03;
         }
     }
 
-    return mapped_bg_color_index;
+    return next_pixel_mapped_color_index;
 }
 
 // ----------------------------------------------------------------------------

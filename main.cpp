@@ -164,6 +164,23 @@ void refresh_ram_page_contents(GameBoy& game_boy, Uint8* ram_page_contents, Uint
 
 // ----------------------------------------------------------------------------
 
+void draw_object_data(SDL_Renderer* renderer, SDL_Texture* font_texture, int text_row, int text_column, int scale, Uint8* oam) {
+    draw_string(renderer, font_texture, text_row++, text_column, scale, "OBJ | Y  X  T  A ");
+    draw_string(renderer, font_texture, text_row++, text_column, scale, "----+------------");
+
+    for (int i = 0; i < 40; i++) {
+        std::string oam_row_contents = "$" + hex(i, 2) + " |";
+        oam_row_contents += " " + hex(oam[i * 4], 2);
+        oam_row_contents += " " + hex(oam[i * 4 + 1], 2);
+        oam_row_contents += " " + hex(oam[i * 4 + 2], 2);
+        oam_row_contents += " " + hex(oam[i * 4 + 3], 2);
+
+        draw_string(renderer, font_texture, text_row++, text_column, scale, oam_row_contents);
+    }
+}
+
+// ----------------------------------------------------------------------------
+
 int main(int argc, char* argv[]) {
     if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " rom_file" << std::endl;
@@ -434,16 +451,19 @@ int main(int argc, char* argv[]) {
             SDL_Rect tile_map_0_destination_rect;
             tile_map_0_destination_rect.x = tiles_destination_rect.x + tiles_destination_rect.w + 20;
             tile_map_0_destination_rect.y = 10;
-            tile_map_0_destination_rect.w = TILE_MAP_TEXTURE_WIDTH * 2;
-            tile_map_0_destination_rect.h = TILE_MAP_TEXTURE_HEIGHT * 2;
+            tile_map_0_destination_rect.w = TILE_MAP_TEXTURE_WIDTH;
+            tile_map_0_destination_rect.h = TILE_MAP_TEXTURE_HEIGHT;
             SDL_RenderCopy(renderer, tile_map_0_texture, NULL, &tile_map_0_destination_rect);
 
             SDL_Rect tile_map_1_destination_rect;
-            tile_map_1_destination_rect.x = tile_map_0_destination_rect.x + tile_map_0_destination_rect.w + 20;
-            tile_map_1_destination_rect.y = 10;
-            tile_map_1_destination_rect.w = TILE_MAP_TEXTURE_WIDTH * 2;
-            tile_map_1_destination_rect.h = TILE_MAP_TEXTURE_HEIGHT * 2;
+            tile_map_1_destination_rect.x = tile_map_0_destination_rect.x;
+            tile_map_1_destination_rect.y = tile_map_0_destination_rect.y + tile_map_0_destination_rect.h + 20;
+            tile_map_1_destination_rect.w = TILE_MAP_TEXTURE_WIDTH;
+            tile_map_1_destination_rect.h = TILE_MAP_TEXTURE_HEIGHT;
             SDL_RenderCopy(renderer, tile_map_1_texture, NULL, &tile_map_1_destination_rect);
+
+            Uint8* oam = game_boy.get_oam();
+            draw_object_data(renderer, font_texture, 2, 44, 2, oam);
         }
 
         SDL_RenderPresent(renderer);
