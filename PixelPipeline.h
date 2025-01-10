@@ -2,7 +2,7 @@
 #define PIXEL_PIPELINE_H
 
 #include <SDL2/SDL.h>
-#include <queue>
+#include <deque>
 
 #include "PixelFetcher.h"
 
@@ -23,6 +23,7 @@ public:
     bool is_ready_with_next_pixel();
     Uint8 get_next_pixel_color_index();
     void load_obj_pixels(Uint8 obj_tile_id, Uint8 obj_attributes, Uint8 obj_y_offset);
+    void mix_obj_pixels_with_bg_pixels();
 
 private:
 
@@ -34,8 +35,8 @@ private:
 
     PixelPipelineState state;
     Uint8 pixels_to_discard;
-    std::queue<PixelInfo> bg_fifo;
-    std::queue<PixelInfo> obj_fifo;
+    std::deque<PixelInfo> pixel_fifo;
+    std::deque<PixelInfo> obj_fifo;
     PixelFetcher pixel_fetcher;
 
     int clock_cycles;

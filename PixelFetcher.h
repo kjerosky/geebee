@@ -12,6 +12,7 @@ enum PixelFetcherState {
 
 struct PixelInfo {
     Uint8 color_index;
+    bool is_obj_pixel;
     bool use_obj_1_palette;
     bool bg_has_priority;
 };
