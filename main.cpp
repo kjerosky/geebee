@@ -300,6 +300,8 @@ int main(int argc, char* argv[]) {
 
     bool show_ppu_objects = false;
 
+    int selected_palette = 0;
+
     bool is_main_program_running = true;
     while (is_main_program_running) {
         SDL_Event event;
@@ -322,9 +324,17 @@ int main(int argc, char* argv[]) {
                 } else if (event.key.keysym.sym == SDLK_f && !is_continuously_running) {
                     game_boy.complete_frame();
                 } else if (event.key.keysym.sym == SDLK_EQUALS) {
-                    ram_page = ram_page + 0x0100;
+                    if (view == View::VRAM) {
+                        selected_palette = (selected_palette + 1) % 3;
+                    } else if (view == View::CPU_AND_RAM) {
+                        ram_page = ram_page + 0x0100;
+                    }
                 } else if (event.key.keysym.sym == SDLK_MINUS) {
-                    ram_page = ram_page - 0x0100;
+                    if (view == View::VRAM) {
+                        selected_palette = (selected_palette == 0) ? 2 : selected_palette - 1;
+                    } else if (view == View::CPU_AND_RAM) {
+                        ram_page = ram_page - 0x0100;
+                    }
                 } else if (event.key.keysym.sym == SDLK_o) {
                     show_ppu_objects = !show_ppu_objects;
                 } else if (event.key.keysym.sym == SDLK_1) {
@@ -411,7 +421,7 @@ int main(int argc, char* argv[]) {
             SDL_RenderClear(renderer);
             SDL_RenderCopy(renderer, screen_texture, NULL, &ratio_maintained_maximized_texture_rect);
         } else if (view == View::VRAM) {
-            game_boy.render_tiles_to_texture(tiles_texture, TILES_TEXTURE_WIDTH, TILES_TEXTURE_HEIGHT);
+            game_boy.render_tiles_to_texture(tiles_texture, TILES_TEXTURE_WIDTH, TILES_TEXTURE_HEIGHT, selected_palette);
 
             SDL_SetRenderTarget(renderer, tile_map_0_texture);
             game_boy.render_tile_map(renderer, 0, tiles_texture, TILES_TEXTURE_WIDTH, show_ppu_objects);
@@ -440,6 +450,14 @@ int main(int argc, char* argv[]) {
                     palette_color_rect.x += 25;
                 }
             }
+
+            SDL_Rect selected_palette_rect;
+            selected_palette_rect.x = 10 + selected_palette * 25 * 5 - 5;
+            selected_palette_rect.y = 600 - 5;
+            selected_palette_rect.w = 25 * 4 - 5 + 10;
+            selected_palette_rect.h = 20 + 10;
+            SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+            SDL_RenderDrawRect(renderer, &selected_palette_rect);
 
             SDL_Rect tiles_destination_rect;
             tiles_destination_rect.x = 10;

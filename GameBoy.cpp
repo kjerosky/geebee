@@ -119,8 +119,8 @@ void GameBoy::disassemble(Uint16 start_address, int num_of_instructions, std::ve
 
 // ----------------------------------------------------------------------------
 
-void GameBoy::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
-    ppu->render_tiles_to_texture(texture, texture_width, texture_height);
+void GameBoy::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height, int palette_index) {
+    ppu->render_tiles_to_texture(texture, texture_width, texture_height, palette_index);
 }
 
 // ----------------------------------------------------------------------------

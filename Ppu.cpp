@@ -261,7 +261,7 @@ void Ppu::cpu_write(Uint16 address, Uint8 value) {
 
 // ----------------------------------------------------------------------------
 
-void Ppu::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height) {
+void Ppu::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height, int palette_index) {
     Uint32* texture_pixels;
     int texture_pixels_row_length;
     SDL_LockTexture(texture, NULL, (void**)&texture_pixels, &texture_pixels_row_length);
@@ -278,7 +278,9 @@ void Ppu::render_tiles_to_texture(SDL_Texture* texture, int texture_width, int t
 
                 for (int bit = 7; bit >= 0; bit--) {
                     int color_index = (((hi_byte >> bit) & 0x01) ? 0x02 : 0x00) | ((lo_byte >> bit) & 0x01);
-                    int mapped_bg_color_index = (bg_palette >> (color_index * 2)) & 0x03;
+
+                    int palettes[] = { bg_palette, obj_palette_0, obj_palette_1 };
+                    int mapped_bg_color_index = (palettes[palette_index] >> (color_index * 2)) & 0x03;
 
                     int pixel_x = 7 - bit;
                     int texture_pixel_x = tile_x * 8 + pixel_x;
