@@ -22,8 +22,8 @@ PixelPipeline::~PixelPipeline() {
 void PixelPipeline::reset(Uint8 screen_x, Uint8 screen_y, Uint8 viewport_x, Uint8 viewport_y) {
     clock_cycles = 0;
 
-    while (!pixel_fifo.empty()) {
-        pixel_fifo.pop_front();
+    while (!bg_fifo.empty()) {
+        bg_fifo.pop_front();
     }
 
     while (!obj_fifo.empty()) {
@@ -47,9 +47,9 @@ void PixelPipeline::reset(Uint8 screen_x, Uint8 screen_y, Uint8 viewport_x, Uint
 // ----------------------------------------------------------------------------
 
 void PixelPipeline::clock() {
-    if (state == INITIAL_FULL_BG_PIXELS_FETCH && pixel_fifo.size() == 16) {
+    if (state == INITIAL_FULL_BG_PIXELS_FETCH && bg_fifo.size() == 16) {
         for (int i = 0; i < pixels_to_discard; i++) {
-            pixel_fifo.pop_front();
+            bg_fifo.pop_front();
         }
 
         state = FETCHING_BG_PIXELS;
@@ -59,7 +59,7 @@ void PixelPipeline::clock() {
         PixelInfo next_pixels[8];
         pixel_fetcher.get_pixels_and_continue(next_pixels);
         for (int i = 0; i < 8; i++) {
-            pixel_fifo.push_back(next_pixels[i]);
+            bg_fifo.push_back(next_pixels[i]);
         }
     }
 
@@ -72,14 +72,24 @@ void PixelPipeline::clock() {
 // ----------------------------------------------------------------------------
 
 bool PixelPipeline::is_ready_with_next_pixel() {
-    return state == FETCHING_BG_PIXELS && pixel_fifo.size() > 8;
+    return state == FETCHING_BG_PIXELS && bg_fifo.size() > 8;
 }
 
 // ----------------------------------------------------------------------------
 
 Uint8 PixelPipeline::get_next_pixel_color_index() {
-    PixelInfo next_pixel = pixel_fifo.front();
-    pixel_fifo.pop_front();
+    PixelInfo next_pixel = bg_fifo.front();
+    bg_fifo.pop_front();
+
+    if (obj_fifo.size() > 0) {
+        PixelInfo obj_pixel = obj_fifo.front();
+        obj_fifo.pop_front();
+
+        if ((obj_pixel.bg_has_priority && next_pixel.color_index == 0) ||
+            (!obj_pixel.bg_has_priority && obj_pixel.color_index != 0)) {
+            next_pixel = obj_pixel;
+        }
+    }
 
     int next_pixel_mapped_color_index;
     if (next_pixel.is_obj_pixel) {
@@ -96,11 +106,7 @@ Uint8 PixelPipeline::get_next_pixel_color_index() {
 
 void PixelPipeline::load_obj_pixels(Uint8 obj_tile_id, Uint8 obj_attributes, Uint8 obj_y_offset) {
     // To keep the pixel fetcher's code a little cleaner, we'll cheat here
-    // for now and just load object pixels on demand.
-
-    while (!obj_fifo.empty()) {
-        obj_fifo.pop_front();
-    }
+    // for now and just load object pixels on demand, immediately.
 
     Uint8 obj_height = ((*lcd_control >> 2) & 0x01) == 0x00 ? 8 : 16;
 
@@ -127,36 +133,22 @@ void PixelPipeline::load_obj_pixels(Uint8 obj_tile_id, Uint8 obj_attributes, Uin
         obj_pixels[i].bg_has_priority = bg_has_priority;
     }
 
-    for (int i = 0; i < 8; i++) {
-        obj_fifo.push_back(obj_pixels[i]);
-    }
+    // We need to properly mix the new object pixels with any existing ones.
+    int existing_obj_pixel_count = obj_fifo.size();
+    for (int i = 0; i < existing_obj_pixel_count; i++) {
+        PixelInfo existing_obj_pixel = obj_fifo.front();
+        obj_fifo.pop_front();
 
-    mix_obj_pixels_with_bg_pixels();
-}
+        PixelInfo new_obj_pixel = obj_pixels[i];
 
-// ----------------------------------------------------------------------------
-
-void PixelPipeline::mix_obj_pixels_with_bg_pixels() {
-    std::deque<PixelInfo> pixels_to_mix;
-    for (int i = 0; i < obj_fifo.size(); i++) {
-        PixelInfo pixel = pixel_fifo.front();
-        pixel_fifo.pop_front();
-
-        pixels_to_mix.push_back(pixel);
-    }
-
-    while (!pixels_to_mix.empty()) {
-        PixelInfo current_pixel = pixels_to_mix.back();
-        pixels_to_mix.pop_back();
-
-        PixelInfo obj_pixel = obj_fifo.back();
-        obj_fifo.pop_back();
-
-        if ((obj_pixel.bg_has_priority && current_pixel.color_index == 0 && obj_pixel.color_index != 0) ||
-            (!obj_pixel.bg_has_priority && obj_pixel.color_index != 0)) {
-            pixel_fifo.push_front(obj_pixel);
+        if (existing_obj_pixel.color_index == 0) {
+            obj_fifo.push_back(new_obj_pixel);
         } else {
-            pixel_fifo.push_front(current_pixel);
+            obj_fifo.push_back(existing_obj_pixel);
         }
+    }
+
+    for (int i = existing_obj_pixel_count; i < 8; i++) {
+        obj_fifo.push_back(obj_pixels[i]);
     }
 }
