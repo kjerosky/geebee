@@ -20,6 +20,15 @@ Cartridge::Cartridge(std::string& rom_filename) {
 
     std::cout << std::endl;
 
+    std::string title;
+    for (int i = 0x0134; i <= 0x0143; i++) {
+        if (rom_contents[i] == 0x00) {
+            break;
+        }
+        title += rom_contents[i];
+    }
+    std::cout << "Title: " << title << std::endl;
+
     Uint8 mapper_id = rom_contents[0x0147];
     std::cout << "Mapper: " << (unsigned int)mapper_id << std::endl;
 
@@ -53,6 +62,27 @@ Cartridge::Cartridge(std::string& rom_filename) {
             break;
         default:
             std::cerr << "[ERROR] Unknown ROM size (" << (unsigned int)rom_contents[0x0148] << ")!" << std::endl;
+            exit(1);
+    }
+
+    switch (rom_contents[0x0149]) {
+        case 0x00:
+            std::cout << "RAM Size: None" << std::endl;
+            break;
+        case 0x02:
+            std::cout << "RAM Size: 8KB" << std::endl;
+            break;
+        case 0x03:
+            std::cout << "RAM Size: 32KB" << std::endl;
+            break;
+        case 0x04:
+            std::cout << "RAM Size: 128KB" << std::endl;
+            break;
+        case 0x05:
+            std::cout << "RAM Size: 64KB" << std::endl;
+            break;
+        default:
+            std::cerr << "[ERROR] Unknown RAM size (" << (unsigned int)rom_contents[0x0149] << ")!" << std::endl;
             exit(1);
     }
 
