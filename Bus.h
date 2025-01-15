@@ -21,7 +21,7 @@ public:
 
     bool check_and_reset_oam_dma_started(Uint16& output_oam_dma_start_address);
 
-    void increment_div_register();
+    Uint8 clock_machine_cycle();
 
 private:
 
@@ -40,6 +40,11 @@ private:
 
     Uint8 joypad_register;
     Uint8 div_register;
+    Uint8 timer_counter;
+    Uint8 timer_modulo;
+    Uint8 timer_control;
+
+    Uint16 machine_cycles;
 
     Uint8 read_from_io_register(Uint16 address);
     void write_to_io_register(Uint16 address, Uint8 value);

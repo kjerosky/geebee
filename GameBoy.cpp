@@ -103,12 +103,15 @@ void GameBoy::clock() {
 
     if (cycle_count % 4 == 0) {
         cpu->clock();
+
+        Uint8 bus_interrupts_raised = bus->clock_machine_cycle();
+        if (bus_interrupts_raised != 0x00) {
+            Uint8 new_if_flag_register_value = bus->cpu_read(0xFF0F) | bus_interrupts_raised;
+            bus->cpu_write(0xFF0F, new_if_flag_register_value);
+        }
     }
 
     cycle_count++;
-    if (cycle_count == 0) {
-        bus->increment_div_register();
-    }
 }
 
 // ----------------------------------------------------------------------------

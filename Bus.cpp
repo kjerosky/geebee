@@ -12,7 +12,13 @@ Bus::Bus(Ppu* ppu, Cartridge* cartridge)
   interrupt_enable_register(0x00),
   oam_dma_started(false),
   oam_dma_start_address(0x0000),
-  joypad_register(0x00) {
+  joypad_register(0x00),
+  div_register(0x00),
+  timer_counter(0x00),
+  timer_modulo(0x00),
+  timer_control(0x00),
+  machine_cycles(0x0000) {
+
     std::memset(work_ram_bank_0, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(work_ram_bank_1, 0x00, WORK_RAM_BANK_SIZE * sizeof(Uint8));
     std::memset(high_ram, 0x00, HIGH_RAM_SIZE * sizeof(Uint8));
@@ -99,6 +105,12 @@ Uint8 Bus::read_from_io_register(Uint16 address) {
         read_value = joypad_register;
     } else if (address == 0xFF04) {
         read_value = div_register;
+    } else if (address == 0xFF05) {
+        read_value = timer_counter;
+    } else if (address == 0xFF06) {
+        read_value = timer_modulo;
+    } else if (address == 0xFF07) {
+        read_value = timer_control;
     } else if (address == 0xFF0F) {
         read_value = interrupt_flag_register;
     } else if (address >= 0xFF40 && address <= 0xFF6C) {
@@ -115,6 +127,12 @@ void Bus::write_to_io_register(Uint16 address, Uint8 value) {
         refresh_joypad_register(value);
     } else if (address == 0xFF04) {
         div_register = 0x00;
+    } else if (address == 0xFF05) {
+        timer_counter = value;
+    } else if (address == 0xFF06) {
+        timer_modulo = value;
+    } else if (address == 0xFF07) {
+        timer_control = value;
     } else if (address == 0xFF0F) {
         interrupt_flag_register = value;
     } else if (address == 0xFF46) {
@@ -184,6 +202,39 @@ void Bus::refresh_joypad_register(Uint8 input_byte) {
 
 // ----------------------------------------------------------------------------
 
-void Bus::increment_div_register() {
-    div_register++;
+Uint8 Bus::clock_machine_cycle() {
+    Uint8 interrupts_raised = 0x00;
+
+    machine_cycles = (machine_cycles + 1) % 256;
+
+    if (machine_cycles % 64 == 0) {
+        div_register++;
+    }
+
+    Uint16 timer_machine_cycle_count;
+    switch (timer_control & 0x03) {
+        case 0x00:
+            timer_machine_cycle_count = 256;
+            break;
+        case 0x01:
+            timer_machine_cycle_count = 4;
+            break;
+        case 0x02:
+            timer_machine_cycle_count = 16;
+            break;
+        case 0x03:
+            timer_machine_cycle_count = 64;
+            break;
+    }
+
+    bool is_timer_enabled = (timer_control & 0x04) != 0x00;
+    if (is_timer_enabled && machine_cycles % timer_machine_cycle_count == 0) {
+        timer_counter++;
+        if (timer_counter == 0x00) {
+            timer_counter = timer_modulo;
+            interrupts_raised |= 0x04;
+        }
+    }
+
+    return interrupts_raised;
 }
