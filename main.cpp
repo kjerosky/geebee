@@ -311,6 +311,8 @@ int main(int argc, char* argv[]) {
             } else if (event.type == SDL_KEYDOWN) {
                 if (event.key.keysym.sym == SDLK_ESCAPE) {
                     is_main_program_running = false;
+                } else if (event.key.keysym.sym == SDLK_r) {
+                    game_boy.reset();
                 } else if (event.key.keysym.sym == SDLK_TAB) {
                     view = (view + 1) % View::NUMBER_OF_ENTRIES;
                 } else if (event.key.keysym.sym == SDLK_SPACE && !is_continuously_running) {

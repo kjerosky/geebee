@@ -25,6 +25,7 @@ public:
     void get_palette_colors(Uint32* output);
     void render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width, bool show_objects);
     Uint8* get_oam();
+    void reset();
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
     void generate_interrupt(int interrupt_bit);

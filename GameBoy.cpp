@@ -140,3 +140,9 @@ void GameBoy::render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Te
 Uint8* GameBoy::get_oam() {
     return ppu->get_oam();
 }
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::reset() {
+    cpu->reset();
+}

@@ -846,7 +846,7 @@ void Cpu::fetch_from_hl() {
 
 void Cpu::fetch_from_af() {
     fetched_u16_msb = a;
-    fetched_u16_lsb = flags;
+    fetched_u16_lsb = flags & 0xF0;
 }
 
 // ----------------------------------------------------------------------------
@@ -1811,7 +1811,7 @@ void Cpu::store_to_sp() {
 
 void Cpu::store_to_af() {
     a = computed_u16_msb;
-    flags = computed_u16_lsb;
+    flags = computed_u16_lsb & 0xF0;
 }
 
 // ----------------------------------------------------------------------------
