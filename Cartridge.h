@@ -19,7 +19,7 @@ public:
 
 private:
 
-    std::vector<Uint8> contents;
+    std::vector<Uint8> rom_contents;
 
     Mapper* mapper;
 };

@@ -1,17 +1,23 @@
 #ifndef MAPPER_00_H
 #define MAPPER_00_H
 
+#include <vector>
+
 #include "Mapper.h"
 
 class Mapper_00 : public Mapper {
 
 public:
 
-    Mapper_00();
+    Mapper_00(std::vector<Uint8>& rom_contents);
     ~Mapper_00();
 
-    Uint16 map_cpu_read(Uint16 address) override;
-    Uint16 map_cpu_write(Uint16 address) override;
+    Uint8 cpu_read(Uint16 address) override;
+    void cpu_write(Uint16 address, Uint8 value) override;
+
+private:
+
+    std::vector<Uint8> rom_contents;
 };
 
 #endif

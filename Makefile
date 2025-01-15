@@ -3,7 +3,19 @@ INCLUDE_PATHS = -I/opt/homebrew/include
 LIBRARY_PATHS = -L/opt/homebrew/lib
 LIBRARIES = -lSDL2 -lSDL2_image
 FLAGS = -g -Wall -std=c++11
-SOURCES = main.cpp bit_utils.cpp GameBoy.cpp Bus.cpp Cpu.cpp Cartridge.cpp Ppu.cpp PixelPipeline.cpp PixelFetcher.cpp Mapper_00.cpp
+SOURCES = \
+	main.cpp \
+	bit_utils.cpp \
+	GameBoy.cpp \
+	Bus.cpp \
+	Cpu.cpp \
+	Cartridge.cpp \
+	Ppu.cpp \
+	PixelPipeline.cpp \
+	PixelFetcher.cpp \
+	Mapper_00.cpp \
+	Mapper_01.cpp \
+	# END OF SOURCES
 
 TEST_EXECUTABLE = run-cpu-test
 TEST_SOURCES = run-cpu-test.cpp GameBoy.cpp Bus.cpp Cpu.cpp
