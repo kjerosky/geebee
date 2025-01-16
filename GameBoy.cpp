@@ -4,12 +4,13 @@
 #include "Cartridge.h"
 #include "Ppu.h"
 
-GameBoy::GameBoy(Cartridge* cartridge, SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format) {
+GameBoy::GameBoy(Cartridge* cartridge, SDL_Texture* screen_texture, SDL_PixelFormat* screen_texture_pixel_format)
+: cycle_count(0),
+  breakpoint_address(0x0000) {
+
     ppu = new Ppu(screen_texture, screen_texture_pixel_format);
     bus = new Bus(ppu, cartridge);
     cpu = new Cpu(bus);
-
-    cycle_count = 0;
 }
 
 // ----------------------------------------------------------------------------
@@ -40,11 +41,21 @@ void GameBoy::execute_next_instruction() {
 
 // ----------------------------------------------------------------------------
 
-void GameBoy::complete_frame() {
+bool GameBoy::complete_frame() {
     ppu->lock_screen_texture();
 
     do {
         clock();
+
+        if (cpu->is_current_instruction_finished() && cpu->get_cpu_info().pc == breakpoint_address) {
+            while (cycle_count % 4 != 0) {
+                clock();
+            }
+
+            ppu->unlock_screen_texture();
+
+            return true;
+        }
     } while (!ppu->is_frame_complete());
 
     // Drain any remaining ppu clock cycles so that the next instruction will
@@ -56,6 +67,8 @@ void GameBoy::complete_frame() {
     }
 
     ppu->unlock_screen_texture();
+
+    return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -148,4 +161,10 @@ Uint8* GameBoy::get_oam() {
 
 void GameBoy::reset() {
     cpu->reset();
+}
+
+// ----------------------------------------------------------------------------
+
+void GameBoy::set_breakpoint(Uint16 address) {
+    breakpoint_address = address;
 }

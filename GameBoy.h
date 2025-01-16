@@ -18,7 +18,7 @@ public:
     ~GameBoy();
 
     void execute_next_instruction();
-    void complete_frame();
+    bool complete_frame();
     Cpu_Info get_cpu_info();
     void disassemble(Uint16 start_address, int num_of_instructions, std::vector<std::string>& output);
     void render_tiles_to_texture(SDL_Texture* texture, int texture_width, int texture_height, int palette_index);
@@ -26,6 +26,7 @@ public:
     void render_tile_map(SDL_Renderer* renderer, int tile_map_index, SDL_Texture* tiles_texture, int tiles_texture_width, bool show_objects);
     Uint8* get_oam();
     void reset();
+    void set_breakpoint(Uint16 address);
 
     void override_cpu_state(Cpu_Info& new_cpu_state);
     void generate_interrupt(int interrupt_bit);
@@ -39,6 +40,7 @@ private:
     Ppu* ppu;
 
     Uint8 cycle_count;
+    Uint16 breakpoint_address;
 
     void clock();
 };

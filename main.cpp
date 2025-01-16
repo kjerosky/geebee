@@ -302,6 +302,8 @@ int main(int argc, char* argv[]) {
 
     int selected_palette = 0;
 
+    game_boy.set_breakpoint(0x0000);
+
     bool is_main_program_running = true;
     while (is_main_program_running) {
         SDL_Event event;
@@ -364,7 +366,11 @@ int main(int argc, char* argv[]) {
                 residual_time -= delta_time;
             } else {
                 residual_time += (1.0 / 60.0) - delta_time;
-                game_boy.complete_frame();
+
+                bool breakpoint_was_hit = game_boy.complete_frame();
+                if (breakpoint_was_hit) {
+                    is_continuously_running = false;
+                }
             }
         }
 
