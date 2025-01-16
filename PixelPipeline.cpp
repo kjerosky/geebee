@@ -129,6 +129,7 @@ void PixelPipeline::load_obj_pixels(Uint8 obj_tile_id, Uint8 obj_attributes, Uin
         int color_index = (((tile_data_msb >> target_bit) & 0x01) ? 0x02 : 0x00) | ((tile_data_lsb >> target_bit) & 0x01);
 
         obj_pixels[i].color_index = color_index;
+        obj_pixels[i].is_obj_pixel = true;
         obj_pixels[i].use_obj_1_palette = use_obj_palette_1;
         obj_pixels[i].bg_has_priority = bg_has_priority;
     }
