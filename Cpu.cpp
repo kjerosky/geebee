@@ -153,7 +153,7 @@ void Cpu::initialize_opcode_tables() {
     opcode_table[0x73] = { &Cpu::fetch_from_e, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
     opcode_table[0x74] = { &Cpu::fetch_from_h, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
     opcode_table[0x75] = { &Cpu::fetch_from_l, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
-    opcode_table[0x76] = { &Cpu::fetch_nop, &Cpu::halt, &Cpu::push, 1 };
+    opcode_table[0x76] = { &Cpu::fetch_nop, &Cpu::halt, &Cpu::store_nop, 1 };
     opcode_table[0x77] = { &Cpu::fetch_from_a, &Cpu::ld_8bit, &Cpu::store_indirect_hl, 2 };
     opcode_table[0x78] = { &Cpu::fetch_from_b, &Cpu::ld_8bit, &Cpu::store_to_a, 1 };
     opcode_table[0x79] = { &Cpu::fetch_from_c, &Cpu::ld_8bit, &Cpu::store_to_a, 1 };
@@ -1735,8 +1735,6 @@ int Cpu::daa() {
 // ----------------------------------------------------------------------------
 
 int Cpu::halt() {
-    split_u16(pc, computed_u16_msb, computed_u16_lsb);
-
     is_halted = true;
 
     return 0;
