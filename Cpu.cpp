@@ -1,12 +1,16 @@
 #include "Cpu.h"
 
+#include <iostream>
+#include <string>
+
 #include "Bus.h"
 #include "bit_utils.h"
 
 Cpu::Cpu(Bus* bus)
         : bus(bus),
           opcode_table(256),
-          prefixed_opcode_table(256) {
+          prefixed_opcode_table(256),
+          is_trace_enabled(false) {
 
     initialize_opcode_tables();
 
@@ -692,7 +696,13 @@ void Cpu::clock() {
             }
         }
 
+        Uint16 pc_at_current_opcode = pc;
         Uint8 opcode_byte = bus->cpu_read(pc++);
+        if (is_trace_enabled) {
+            std::vector<std::string> trace_opcode_disassembled_list;
+            disassemble(pc_at_current_opcode, 1, trace_opcode_disassembled_list);
+            std::cout << "[TRACE] " << trace_opcode_disassembled_list[0] << std::endl;
+        }
 
         Instruction opcode;
         is_current_opcode_prefixed = opcode_byte == 0xCB;

@@ -302,7 +302,7 @@ int main(int argc, char* argv[]) {
 
     int selected_palette = 0;
 
-    game_boy.set_breakpoint(0x0000);
+    game_boy.set_breakpoint(0xFFFF);
 
     bool is_main_program_running = true;
     while (is_main_program_running) {

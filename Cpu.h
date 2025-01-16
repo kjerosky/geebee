@@ -99,6 +99,8 @@ private:
     bool is_oam_dma_transfer_in_progress;
     Uint16 oam_dma_source_address;
 
+    bool is_trace_enabled;
+
     // opcode fetch functions
     void fetch_nop();
     void fetch_from_a();
