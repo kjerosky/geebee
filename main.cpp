@@ -282,6 +282,26 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    SDL_AudioSpec desired_audio_spec;
+    desired_audio_spec.freq = 44100;
+    desired_audio_spec.format = AUDIO_F32;
+    desired_audio_spec.channels = 1;
+    desired_audio_spec.samples = 4096;
+    desired_audio_spec.callback = NULL;
+    SDL_AudioDeviceID audio_device_id = SDL_OpenAudioDevice(NULL, 0, &desired_audio_spec, NULL, 0);
+    if (audio_device_id == 0) {
+        std::cerr << "ERROR: Audio device could not be opened!  SDL error: " << SDL_GetError() << std::endl;
+        SDL_DestroyTexture(tile_map_1_texture);
+        SDL_DestroyTexture(tile_map_0_texture);
+        SDL_DestroyTexture(tiles_texture);
+        SDL_FreeFormat(screen_texture_pixel_format);
+        SDL_DestroyTexture(screen_texture);
+        SDL_DestroyTexture(font_texture);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
+        return 1;
+    }
+
     Cartridge cartridge(rom_filename);
     GameBoy game_boy(&cartridge, screen_texture, screen_texture_pixel_format);
     Uint8 ram_page_contents[256];
@@ -322,6 +342,8 @@ int main(int argc, char* argv[]) {
                     ram_page = game_boy.get_cpu_info().pc & 0xFF00;
                 } else if (event.key.keysym.sym == SDLK_RETURN) {
                     is_continuously_running = !is_continuously_running;
+                    SDL_PauseAudioDevice(audio_device_id, is_continuously_running ? 0 : 1);
+
                     current_counter = SDL_GetPerformanceCounter();
                     previous_counter = current_counter;
                     residual_time = 0;
@@ -367,9 +389,22 @@ int main(int argc, char* argv[]) {
             } else {
                 residual_time += (1.0 / 60.0) - delta_time;
 
+                static float t = 0.0f;
+                float audio_buffer[4096];
+                int used_audio_buffer_size = static_cast<int>(1.0f / 60.0f * 44100.0f);
+                for (int i = 0; i < used_audio_buffer_size; i++) {
+                    //todo figure out how to fill this buffer from the gameboy
+                    // audio_buffer[i] = 0.5f * sinf(t * 2.0f * 3.14159f * 440.0f);
+                    audio_buffer[i] = 0.0f;
+                    t += 1.0f / 44100.0f;
+                }
+
+                SDL_QueueAudio(audio_device_id, audio_buffer, used_audio_buffer_size * sizeof(float));
+
                 bool breakpoint_was_hit = game_boy.complete_frame();
                 if (breakpoint_was_hit) {
                     is_continuously_running = false;
+                    SDL_PauseAudioDevice(audio_device_id, is_continuously_running ? 0 : 1);
                 }
             }
         }
